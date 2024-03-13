@@ -5,7 +5,8 @@ settings = {
         "iterations":10,
         "islands":2,
         "agentsPerIsland":10,
-        "maxStartingEnergyLvl":15
+        "maxStartingGenotype": 10,
+        "maxStartingEnergyLvl": 15
     },
     "actions":[
         {
@@ -88,7 +89,7 @@ class Island:
 def main():
     islands=[]
     for _ in range(settings["parameters"]["islands"]):
-        island = Island([Agent(random.randint(1, 10), random.randint(1, settings["parameters"]["maxStartingEnergyLvl"])) for _ in range(settings["parameters"]["agentsPerIsland"])],islands)
+        island = Island([Agent(random.randint(1, settings["parameters"]["maxStartingGenotype"]), random.randint(1, settings["parameters"]["maxStartingEnergyLvl"])) for _ in range(settings["parameters"]["agentsPerIsland"])],islands)
         islands.append(island)
 
 
