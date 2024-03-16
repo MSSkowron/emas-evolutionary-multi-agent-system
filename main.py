@@ -3,28 +3,30 @@ import statistics
 import plotille
 
 settings = {
-    "parameters":{
-        "iterations":10,
-        "islands":2,
-        "agentsPerIsland":10,
+    "parameters": {
+        "iterations": 10,
+        "islands": 2,
+        "agentsPerIsland": 10,
         "maxStartingGenotype": 10,
         "maxStartingEnergyLvl": 15
     },
-    "actions":[
+    "actions": [
         {
-            "name":"fight",
-            "reqEnergy":0
+            "name": "fight",
+            "reqEnergy": 0
         },
         {
-            "name":"reproduce",
-            "reqEnergy":7
+            "name": "reproduce",
+            "reqEnergy": 7
         },
         {
-            "name":"migration",
-            "reqEnergy":9
+            "name": "migration",
+            "reqEnergy": 9
         }
     ]
 }
+
+
 class Agent:
     def __init__(self, genotype, energy):
         self.genotype = genotype
@@ -36,12 +38,12 @@ class Agent:
         neighbor.energy -= neighbor.energy * 0.05
 
         if self.genotype > neighbor.genotype:
-            energy = neighbor.energy * 0.1 # Zabieramy część energii sąsiada
+            energy = neighbor.energy * 0.1  # Zabieramy część energii sąsiada
             self.energy += energy
-            neighbor.energy -= energy  
+            neighbor.energy -= energy
         else:
-            energy = self.energy * 0.1 # Przekazujemy część naszej energii
-            neighbor.energy += energy  
+            energy = self.energy * 0.1  # Przekazujemy część naszej energii
+            neighbor.energy += energy
             self.energy -= energy
 
     def reproduce(self, neighbor, reqEnergy):
@@ -52,7 +54,7 @@ class Agent:
         if self.energy > reqEnergy and neighbor.energy > reqEnergy:
             child_genotype = (self.genotype + neighbor.genotype) / 2  # Średnia genotypów rodziców
             child_energy = (self.energy + neighbor.energy) / 2  # Średnia energii rodziców
-            child_energy += child_energy * 0.2 # energy boost for newborn
+            child_energy += child_energy * 0.2  # energy boost for newborn
             return Agent(child_genotype, child_energy)
         else:
             return None
@@ -86,7 +88,6 @@ class Island:
 
         self.migrate(to_be_migrated)
 
-
     def perform_death(self):
         self.agents = [agent for agent in self.agents if not agent.die()]
 
@@ -97,16 +98,17 @@ class Island:
             agent.energy -= agent.energy * 0.1
             self.agents.remove(agent)
 
-        
+
 def prepare_input_data():
     for _ in range(settings["parameters"]["islands"]):
         maxStartingGenotype = random.randint(1, settings["parameters"]["maxStartingGenotype"])
         maxStartingEnergyLvl = random.randint(1, settings["parameters"]["maxStartingEnergyLvl"])
         yield maxStartingGenotype, maxStartingEnergyLvl, settings["parameters"]["agentsPerIsland"]
 
+
 def main():
     islands = []
-    output_data = { "iteration": [], "island": []}
+    output_data = {"iteration": [], "island": []}
 
     for input_data in prepare_input_data():
         island = Island([Agent(input_data[0], input_data[1]) for _ in range(input_data[2])], islands)
@@ -135,7 +137,8 @@ def main():
         print(plotille.plot(energy_X, genotype_Y, height=10, width=60, interp="linear", lc="yellow"))
 
         print("\nEnergy plot for iterations:")
-        print(plotille.plot(output_data["iteration"], output_data["island"][i], height=30, width=60, interp="linear", lc="cyan"))
+        print(plotille.plot(output_data["iteration"], output_data["island"][i], height=30, width=60, interp="linear",
+                            lc="cyan"))
 
 
 if __name__ == "__main__":
