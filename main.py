@@ -38,22 +38,22 @@ class Agent:
         neighbor.energy -= neighbor.energy * 0.05
 
         if self.genotype > neighbor.genotype:
-            energy = neighbor.energy * 0.1  # Zabieramy część energii sąsiada
+            energy = neighbor.energy * 0.1
             self.energy += energy
             neighbor.energy -= energy
         else:
-            energy = self.energy * 0.1  # Przekazujemy część naszej energii
+            energy = self.energy * 0.1
             neighbor.energy += energy
             self.energy -= energy
 
-    def reproduce(self, neighbor, reqEnergy):
+    def reproduce(self, neighbor, req_energy):
         # energy loss due to reproduction
         self.energy -= self.energy * 0.1
         neighbor.energy -= neighbor.energy * 0.1
 
-        if self.energy > reqEnergy and neighbor.energy > reqEnergy:
-            child_genotype = (self.genotype + neighbor.genotype) / 2  # Średnia genotypów rodziców
-            child_energy = (self.energy + neighbor.energy) / 2  # Średnia energii rodziców
+        if self.energy > req_energy and neighbor.energy > req_energy:
+            child_genotype = (self.genotype + neighbor.genotype) / 2
+            child_energy = (self.energy + neighbor.energy) / 2
             child_energy += child_energy * 0.2  # energy boost for newborn
             return Agent(child_genotype, child_energy)
         else:
@@ -101,9 +101,9 @@ class Island:
 
 def prepare_input_data():
     for _ in range(settings["parameters"]["islands"]):
-        maxStartingGenotype = random.randint(1, settings["parameters"]["maxStartingGenotype"])
-        maxStartingEnergyLvl = random.randint(1, settings["parameters"]["maxStartingEnergyLvl"])
-        yield maxStartingGenotype, maxStartingEnergyLvl, settings["parameters"]["agentsPerIsland"]
+        max_starting_genotype = random.randint(1, settings["parameters"]["maxStartingGenotype"])
+        max_starting_energy_lvl = random.randint(1, settings["parameters"]["maxStartingEnergyLvl"])
+        yield max_starting_genotype, max_starting_energy_lvl, settings["parameters"]["agentsPerIsland"]
 
 
 def main():
@@ -130,11 +130,10 @@ def main():
         for agent in island.agents:
             print("Genotype:", agent.genotype, "Energy:", agent.energy)
 
-        fig = plotille.Figure()
         print("\nGenotype and energy plot:")
-        genotype_Y = [agent.genotype for agent in island.agents]
-        energy_X = [agent.energy for agent in island.agents]
-        print(plotille.plot(energy_X, genotype_Y, height=10, width=60, interp="linear", lc="yellow"))
+        genotype_y = [agent.genotype for agent in island.agents]
+        energy_x = [agent.energy for agent in island.agents]
+        print(plotille.plot(energy_x, genotype_y, height=10, width=60, interp="linear", lc="yellow"))
 
         print("\nEnergy plot for iterations:")
         print(plotille.plot(output_data["iteration"], output_data["island"][i], height=30, width=60, interp="linear",
