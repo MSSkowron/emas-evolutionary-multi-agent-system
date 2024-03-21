@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 settings = {
     "parameters": {
-        "iterations": 30,
+        "iterations": 20,
         "islands": 2,
         "agentsPerIsland": 10,
         "maxStartingGenotype": 10,
@@ -183,8 +183,10 @@ def main():
         y_val = []
         z_val = []
         rate1 = 0.003
-        rate2 = 0.025
+        rate2 = 0.02
         rate3 = 0.003
+
+        min_point = [-1,-1,-1]
 
         for series_idx, series in enumerate(scatter_data["island"][island_idx]):
             x_val = []
@@ -197,7 +199,14 @@ def main():
                 y_val.append(point[1])
                 z_val.append(point[2])
 
+                if min_point[2] == -1 or min_point[2] > point[2]:
+                    min_point[0] = point[0]
+                    min_point[1] = point[1]
+                    min_point[2] = point[2]
+
                 ax.scatter(x_val, y_val, z_val, color=[rate1*series_idx, rate2*series_idx, rate3*series_idx])
+
+        print("Minimum in: x: ", min_point[0], " y: ", min_point[1], " energy: ", min_point[2])
 
         plt.show()
 
