@@ -5,6 +5,7 @@ from rastrigin import rastrigin
 import numpy as np
 import copy
 import math
+import matplotlib.pyplot as plt
 
 settings = {
     "parameters": {
@@ -16,7 +17,8 @@ settings = {
         "minRast": -5.12,
         "maxRast": 5.12,
         "minVec": 0,
-        "maxVec": 1.8
+        "maxVec": 1.8,
+        "variance_of_vector": 0.5
     },
     "actions": [
         {
@@ -34,13 +36,12 @@ settings = {
     ]
 }
 
-
 class Agent:
     def __init__(self, x, s):
         self.energy = rastrigin(x)
         self.x = x
         self.s = s
-        self.d = 0.7
+        self.d = settings["parameters"]["variance_of_vector"]
 
     def fight(self, neighbor):
         if self.energy < neighbor.energy:
@@ -147,36 +148,58 @@ def prepare_input_data():
 def main():
     islands = []
     output_data = {"iteration": [], "island": []}
+    scatter_data = {"island": []}
 
     for input_data in prepare_input_data():
         island = Island([Agent(input_data[0], input_data[1]) for _ in range(input_data[2])], islands)
         islands.append(island)
         output_data["island"].append([])
-    print([math.floor(agent.energy) for agent in islands[0].agents])
+        scatter_data["island"].append([])
+        
+    for island_idx in range(len(islands)):
+        scatter_data["island"][island_idx].append([(agent.x[0], agent.x[1], agent.energy) for agent in islands[island_idx].agents])
+
     for it in range(settings["parameters"]["iterations"]):
         output_data["iteration"].append(it)
-        for idx, island in enumerate(islands):
+        for island_idx, island in enumerate(islands):
             island.perform_actions()
             energies = [agent.energy for agent in island.agents]
             if len(energies) == 0:
                 energies.append(0)
-            output_data["island"][idx].append(statistics.mean(energies))
-        print([math.floor(agent.energy) for agent in islands[0].agents])
+            output_data["island"][island_idx].append(statistics.mean(energies))
+            scatter_data["island"][island_idx].append([ (agent.x[0], agent.x[1], agent.energy) for agent in islands[island_idx].agents ])
 
-    for i, island in enumerate(islands):
-        print(f"Final agents on island {i}:")
-        # for agent in island.agents:
-        #     print("Genotype:", agent.genotype, "Energy:", agent.energy)
-
-        # print("\nGenotype and energy plot:")
-        # genotype_y = [agent.genotype for agent in island.agents]
-        # energy_x = [agent.energy for agent in island.agents]
-        # print(plotille.plot(energy_x, genotype_y, height=10, width=60, interp="linear", lc="yellow"))
+    for island_idx, island in enumerate(islands):
+        print(f"Final agents on island {island_idx}:")
 
         print("\nEnergy plot for iterations:")
-        print(plotille.plot(output_data["iteration"], output_data["island"][i], height=30, width=60, interp="linear",
+        print(plotille.plot(output_data["iteration"], output_data["island"][island_idx], height=30, width=60, interp="linear",
                             lc="cyan"))
 
+        fig = plt.figure(figsize=(12, 12))
+        ax = fig.add_subplot(projection='3d')
+
+        x_val = []
+        y_val = []
+        z_val = []
+        rate1 = 0.003
+        rate2 = 0.025
+        rate3 = 0.003
+
+        for series_idx, series in enumerate(scatter_data["island"][island_idx]):
+            x_val = []
+            y_val = []
+            z_val = []
+
+            for point in series:
+                if point[2] >= 200: continue
+                x_val.append(point[0])
+                y_val.append(point[1])
+                z_val.append(point[2])
+
+                ax.scatter(x_val, y_val, z_val, color=[rate1*series_idx, rate2*series_idx, rate3*series_idx])
+
+        plt.show()
 
 if __name__ == "__main__":
     main()
