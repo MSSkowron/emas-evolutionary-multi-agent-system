@@ -20,11 +20,13 @@
     W każdej iteracji jest wywoływane po kolei:
 
    - Reprodukcja 
+   
        Dla każdego osobnika losujemy z pozostałych osobników partnera do reprodukcji.
        Reprodukcja wymaga jakiejś minimalnej energii, która jest parametryzowalna (tak jak mieliśmy wcześniej).
        Reprodukcja zabiera rodzicom troche ich energii, która jest przekazywana dziecku.
 
    - Walka
+   
        Dla każdego osobnika losujemy z pozostałych osobników przeciwnika do walki.
        W wyniku walki nastepuje przepływ energii jeden traci drugi zyskuje (energia w układzie musi być stała!)
 
