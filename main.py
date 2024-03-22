@@ -3,17 +3,13 @@ import statistics
 import plotille
 from rastrigin import rastrigin
 import numpy as np
-import copy
-import math
 import matplotlib.pyplot as plt
 
 settings = {
     "parameters": {
-        "iterations": 20,
+        "iterations": 50,
         "islands": 2,
-        "agentsPerIsland": 10,
-        "maxStartingGenotype": 10,
-        "maxStartingEnergyLvl": 15,
+        "agentsPerIsland": 50,
         "minRast": -5.12,
         "maxRast": 5.12,
         "minVec": 0,
@@ -39,58 +35,70 @@ settings = {
 
 class Agent:
     def __init__(self, x, s):
-        self.energy = rastrigin(x)
         self.x = x
         self.s = s
+        self.energy = self.evaluate()
         self.d = settings["parameters"]["variance_of_vector"]
 
-    def fight(self, neighbor):
-        if self.energy < neighbor.energy:
-            neighbor.energy = -1
+    def evaluate(self):
+        return rastrigin(self.x)
+
+    @staticmethod
+    def fight(agent_1, agent_2):
+        if agent_1.energy < agent_2.energy:
+            agent_2.energy = -1
         else:
-            self.energy = -1
+            agent_1.energy = -1
 
-    def reproduce(self, neighbor):
-        self_s = copy.copy(self.s)
-        self_s[0] *= np.exp(np.random.normal(0, self.d))
-        self_s[1] *= np.exp(np.random.normal(0, self.d))
+    def mutate(self):
+        self.s[0] *= np.exp(np.random.normal(0, self.d))
+        self.s[1] *= np.exp(np.random.normal(0, self.d))
 
-        self_x = copy.copy(self.x)
-        self_x[0] += np.random.normal(0, self_s[0])
-        self_x[1] += np.random.normal(0, self_s[1])
+        self.x[0] += np.random.normal(0, self.s[0])
+        self.x[1] += np.random.normal(0, self.s[1])
 
-        neighbor_s = copy.copy(neighbor.s)
-        neighbor_s[0] *= np.exp(np.random.normal(0, neighbor.d))
-        neighbor_s[1] *= np.exp(np.random.normal(0, neighbor.d))
+    @staticmethod
+    def crossover(parent1, parent2):
+        parent1_genotype = (parent1.x, parent1.s)
+        parent2_genotype = (parent2.x, parent2.s)
 
-        neighbor_x = copy.copy(neighbor.x)
-        neighbor_x[0] += np.random.normal(0, neighbor_s[0])
-        neighbor_x[1] += np.random.normal(0, neighbor_s[1])
-
-        newborn = 0
-        cross_genotype = 0
-        if self.energy < neighbor.energy:
-            newborn = Agent(self_x, self_s)
-            cross_genotype = (neighbor_x, neighbor_s)
+        newborn_x = [0, 0]
+        newborn_s = [0, 0]
+        if random.random() < 0.5:
+            newborn_x[0] = parent1_genotype[0][0]
+            newborn_s[0] = parent1_genotype[1][0]
         else:
-            newborn = Agent(neighbor_x, neighbor_s)
-            cross_genotype = (self_x, self_s)
+            newborn_x[0] = parent2_genotype[0][0]
+            newborn_s[0] = parent2_genotype[1][0]
 
-        if random.randint(1, 4) == 4:
-            newborn.x[0] = cross_genotype[0][0]
-            newborn.s[0] = cross_genotype[1][0]
+        if random.random() < 0.5:
+            newborn_x[1] = parent1_genotype[0][1]
+            newborn_s[1] = parent1_genotype[1][1]
+        else:
+            newborn_x[1] = parent2_genotype[0][1]
+            newborn_s[1] = parent2_genotype[1][1]
 
-        if random.randint(1, 4) == 4:
-            newborn.x[1] = cross_genotype[0][1]
-            newborn.s[1] = cross_genotype[1][1]
+        return newborn_x, newborn_s
+
+    @staticmethod
+    def reproduce(parent1, parent2):
+        if random.randint(1, 2) == 1:
+            newborn_x, newborn_y = Agent.crossover(parent1, parent2)
+        else:
+            newborn_x = [random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"]),
+                        random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"])]
+            newborn_y = [random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"]),
+                        random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"])]
+
+        newborn = Agent(newborn_x, newborn_y)
+
+        if random.randint(1, 4) == 1:
+            newborn.mutate()
 
         return newborn
 
     def is_dead(self):
         return self.energy < 0
-
-    def print(self):
-        print("e: ", self.energy)
 
 
 class Island:
@@ -104,30 +112,35 @@ class Island:
         newborns = []
         initial_agent_amount = len(self.agents)
 
-        for idx, agent in enumerate(self.agents):
-            neighbor = random.choice([agent_t for agent_t in self.agents if agent_t != agent])
-            child = agent.reproduce(neighbor)
-            self.agents.append(child)
+        # Reproduce
+        for idx, agent_1 in enumerate(self.agents):
+            agent_2 = random.choice([agent_t for agent_t in self.agents if agent_t != agent_1])
+            newborn = Agent.reproduce(agent_1, agent_2)
+            newborns.append(newborn)
             if idx == initial_agent_amount - 1:
                 break
+        self.agents.extend(newborns)
 
-        for idx, agent in enumerate(self.agents):
-            if agent.is_dead():
+        # Fight
+        for idx, agent_1 in enumerate(self.agents):
+            if agent_1.is_dead():
                 initial_agent_amount += 1
                 continue
-            neighbor = random.choice([agent_t for agent_t in self.agents if agent_t != agent and not agent_t.is_dead()])
-            agent.fight(neighbor)
+            agent_2 = random.choice([agent_t for agent_t in self.agents if agent_t != agent_1 and not agent_t.is_dead()])
+            Agent.fight(agent_1, agent_2)
             if idx == initial_agent_amount - 1:
                 break
 
-        self.perform_death()
-        for agent in self.agents:
-            if random.randint(0, 11) == 10:
-                to_be_migrated.append(agent)
+        # Remove dead
+        self.remove_dead()
 
+        # Migrate
+        for agent in self.agents:
+            if random.randint(1, 10) == 1:
+                to_be_migrated.append(agent)
         self.migrate(to_be_migrated)
 
-    def perform_death(self):
+    def remove_dead(self):
         self.agents = [agent for agent in self.agents if not agent.is_dead()]
 
     def migrate(self, to_be_migrated):
@@ -183,9 +196,6 @@ def main():
         fig = plt.figure(figsize=(12, 12))
         ax = fig.add_subplot(projection='3d')
 
-        x_val = []
-        y_val = []
-        z_val = []
         rate1 = 0.003
         rate2 = 0.02
         rate3 = 0.003
