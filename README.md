@@ -32,9 +32,9 @@
 
    - Sprzątanie zmarłych
     
-3. **Usunięcie migracji**
+3. ~~**Usunięcie migracji**~~
 
-    Na początkowym etapie ograniczyć się do pracy na pojedynczej "wyspie".
+    ~~Na początkowym etapie ograniczyć się do pracy na pojedynczej "wyspie".~~
 
 4. **Reprezentacja osobnika jako mającego dyskretną energię i genotyp będący wektorem**
 
@@ -49,8 +49,7 @@
 
     Planować algorytm tak, aby działał dla różnych funkcji celu i różnych wymiarów problemu.
 
-7. **Wykres**
+7. ~~**Wykres**~~
 
-    Na osi x umieścić kolejne iteracje.
-    Na osi y przedstawiać najlepszego agenta (z najwyższą energią) w danej iteracji, czyli minimum, które zostało znalezione do tej pory.
-    
+    ~~Na osi x umieścić kolejne iteracje.
+    Na osi y przedstawiać najlepszego agenta (z najwyższą energią) w danej iteracji, czyli minimum, które zostało znalezione do tej pory.~~

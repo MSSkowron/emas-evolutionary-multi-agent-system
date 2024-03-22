@@ -1,15 +1,13 @@
+import math
 import random
-import statistics
-import plotille
 from rastrigin import rastrigin
 import numpy as np
 import matplotlib.pyplot as plt
 
 settings = {
     "parameters": {
-        "iterations": 20,
-        "islands": 2,
-        "agentsPerIsland": 50,
+        "numberOfIterations": 50,
+        "numberOfAgents": 100,
         "minRast": -5.12,
         "maxRast": 5.12,
         "minVec": 0,
@@ -31,6 +29,7 @@ settings = {
         }
     ]
 }
+
 
 class Agent:
     def __init__(self, x, s):
@@ -85,9 +84,9 @@ class Agent:
             newborn_x, newborn_y = Agent.crossover(parent1, parent2)
         else:
             newborn_x = [random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"]),
-                        random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"])]
+                         random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"])]
             newborn_y = [random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"]),
-                        random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"])]
+                         random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"])]
 
         newborn = Agent(newborn_x, newborn_y)
 
@@ -100,14 +99,12 @@ class Agent:
         return self.energy < 0
 
 
-class Island:
-    def __init__(self, agents, islands):
+class EMAS:
+    def __init__(self, agents):
         self.agents = agents
-        self.islands = islands
 
-    def perform_actions(self):
+    def run_iteration(self):
         random.shuffle(self.agents)
-        to_be_migrated = []
         newborns = []
         initial_agent_amount = len(self.agents)
 
@@ -125,7 +122,8 @@ class Island:
             if agent_1.is_dead():
                 initial_agent_amount += 1
                 continue
-            agent_2 = random.choice([agent_t for agent_t in self.agents if agent_t != agent_1 and not agent_t.is_dead()])
+            agent_2 = random.choice(
+                [agent_t for agent_t in self.agents if agent_t != agent_1 and not agent_t.is_dead()])
             Agent.fight(agent_1, agent_2)
             if idx == initial_agent_amount - 1:
                 break
@@ -133,95 +131,57 @@ class Island:
         # Remove dead
         self.remove_dead()
 
-        # Migrate
-        for agent in self.agents:
-            if random.randint(1, 10) == 1:
-                to_be_migrated.append(agent)
-        self.migrate(to_be_migrated)
-
     def remove_dead(self):
         self.agents = [agent for agent in self.agents if not agent.is_dead()]
 
-    def migrate(self, to_be_migrated):
-        for agent in to_be_migrated:
-            island = random.choice(self.islands)
-            island.agents.append(agent)
-            self.agents.remove(agent)
-
-
-def prepare_input_data():
-    for _ in range(settings["parameters"]["islands"]):
-        x = [random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"]),
-             random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"])]
-        s = [random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"]),
-             random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"])]
-        yield x, s, settings["parameters"]["agentsPerIsland"]
-
 
 def main():
-    islands = []
-    output_data = {"iteration": [], "island": []}
-    scatter_data = {"island": []}
+    agents = [Agent(
+        [random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"]),
+         random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"])],
+        [random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"]),
+         random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"])]
+    ) for _ in range(settings["parameters"]['numberOfAgents'])]
 
-    for input_data in prepare_input_data():
-        island = Island([Agent(input_data[0], input_data[1]) for _ in range(input_data[2])], islands)
-        islands.append(island)
-        output_data["island"].append([])
-        scatter_data["island"].append([])
+    emas = EMAS(agents)
 
-    for island_idx in range(len(islands)):
-        scatter_data["island"][island_idx].append(
-            [(agent.x[0], agent.x[1], agent.energy) for agent in islands[island_idx].agents])
+    data = []
+    for it in range(settings["parameters"]["numberOfIterations"]):
+        emas.run_iteration()
 
-    for it in range(settings["parameters"]["iterations"]):
-        output_data["iteration"].append(it)
-        for island_idx, island in enumerate(islands):
-            island.perform_actions()
-            energies = [agent.energy for agent in island.agents]
-            if len(energies) == 0:
-                energies.append(0)
-            output_data["island"][island_idx].append(statistics.mean(energies))
-            scatter_data["island"][island_idx].append(
-                [(agent.x[0], agent.x[1], agent.energy) for agent in islands[island_idx].agents])
+        best_energy, best_agent = math.inf, None
+        for agent in emas.agents:
+            if agent.energy < best_energy:
+                best_energy = agent.energy
+                best_agent = agent
 
-    for island_idx, island in enumerate(islands):
-        print(f"Final agents on island {island_idx}:")
+        if best_agent is not None:
+            data.append((best_agent.x, best_agent.evaluate(), best_agent.energy))
 
-        print("\nEnergy plot for iterations:")
-        print(plotille.plot(output_data["iteration"], output_data["island"][island_idx], height=30, width=60,
-                            interp="linear",
-                            lc="cyan"))
+    best_energy, best_value, best_agent = math.inf, math.inf, None
+    for agent in emas.agents:
+        if agent.energy < best_energy:
+            best_energy = agent.energy
+            best_value = agent.evaluate()
+            best_agent = agent
 
-        fig = plt.figure(figsize=(12, 12))
-        ax = fig.add_subplot(projection='3d')
+    for i in range(len(best_agent.x)):
+        best_agent.x[i] = round(best_agent.x[i], 2)
 
-        rate1 = 0.003
-        rate2 = 0.02
-        rate3 = 0.003
+    print(f"Minimum in {best_agent.x} equals = {best_value:.2f} for agent with energy equals = {best_energy:.2f}")
 
-        min_point = [-1, -1, -1]
+    iteration_data = [i + 1 for i in range(len(data))]
+    energy_data = [item[2] for item in data]
 
-        for series_idx, series in enumerate(scatter_data["island"][island_idx]):
-            x_val = []
-            y_val = []
-            z_val = []
+    plt.figure(figsize=(10, 6))
+    plt.plot(iteration_data, energy_data, marker='o', linestyle='-')
+    plt.title('Energy Plot for Iterations')
+    plt.xlabel('Iteration')
+    plt.ylabel('Best energy')
+    plt.grid(True)
+    plt.show()
 
-            for point in series:
-                if point[2] >= 200: continue
-                x_val.append(point[0])
-                y_val.append(point[1])
-                z_val.append(point[2])
-
-                if min_point[2] == -1 or min_point[2] > point[2]:
-                    min_point[0] = point[0]
-                    min_point[1] = point[1]
-                    min_point[2] = point[2]
-
-                ax.scatter(x_val, y_val, z_val, color=[rate1 * series_idx, rate2 * series_idx, rate3 * series_idx])
-
-        print("Minimum in: x: ", min_point[0], " y: ", min_point[1], " energy: ", min_point[2])
-
-        plt.show()
+    plt.show()
 
 
 if __name__ == "__main__":
