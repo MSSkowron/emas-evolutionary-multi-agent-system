@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 settings = {
     "parameters": {
-        "iterations": 50,
+        "iterations": 20,
         "islands": 2,
         "agentsPerIsland": 50,
         "minRast": -5.12,
@@ -31,7 +31,6 @@ settings = {
         }
     ]
 }
-
 
 class Agent:
     def __init__(self, x, s):
