@@ -2,33 +2,53 @@
 
 ## EMAS (Evolutionary Multi-agent System)
 
-- https://www.age.agh.edu.pl/agent-based-computing/emas-2/
+    https://www.age.agh.edu.pl/agent-based-computing/emas-2/
 
 ## irace (Iterated Racing for Automatic Algorithm Configuration) - Lopez-Ibanez, Stutzle
 
-
 ## Plan:
-jmetal:
-    sbx
-    https://github.com/jMetal/jMetalPy/tree/main/jmetal/operator
 
-może coś takiego:
-https://deap.readthedocs.io/en/master/
+1. **Zmiana operatorów**
 
-1 wyspa tylko, bez migracji
-mutacja i krzyżowanie tylko z operatorów, zaprogramować jako pipe and filters
-poprawić mutacje jakąs bardziej zaawansowaną, ale jakąś gotową skądś (najelpiej wrócić do tego co było dzielenie wektorów w krzyżownaniu)
+    Wykorzystać istniejące implementacje operatorów (mutacja, krzyżowanie).
+    Można skorzystać z gotowych rozwiązań z jmetal, takich jak sbx (https://github.com/jMetal/jMetalPy/tree/main/jmetal/operator).
+    Warto również rozważyć bibliotekę DEAP (https://deap.readthedocs.io/en/master/).
+    Operatory powinny być stosowane zgodnie z podejściem "pipe and filters".
 
-rozszerzyć rozwiązanie na wiele wymiarów:
-    osobnik reprezentowany jako wektor
-walka:
-    poprzez losowanie uczestników
-    przekazywanie energii
-każda operator wymaga jakiejś energii, przekazywanie energii
-dyskretna energia i stała w systemie
-zgeneralizować dla różnych funkcji i wielu wymiarów
+2. **Akcje**
 
-wykresy:
-    na osi x iteracja
-    na osi y najlepszy agent, z najwyższą energią
+    W każdej iteracji jest wywoływane po kolei:
 
+   - Reprodukcja 
+       Dla każdego osobnika losujemy z pozostałych osobników partnera do reprodukcji.
+       Reprodukcja wymaga jakiejś minimalnej energii, która jest parametryzowalna (tak jak mieliśmy wcześniej).
+       Reprodukcja zabiera rodzicom troche ich energii, która jest przekazywana dziecku.
+
+   - Walka
+       Dla każdego osobnika losujemy z pozostałych osobników przeciwnika do walki.
+       W wyniku walki nastepuje przepływ energii jeden traci drugi zyskuje (energia w układzie musi być stała!)
+
+   - Sprzątanie zmarłych
+    
+3. **Usunięcie migracji**
+
+    Na początkowym etapie ograniczyć się do pracy na pojedynczej "wyspie".
+
+4. **Reprezentacja osobnika jako mającego dyskretną energię i genotyp będący wektorem**
+
+    Kontynuować z wykorzystaniem wektorowej reprezentacji osobnika (np. Agent.x jako wektor współrzędnych x1, x2, ..., xn).
+
+5. **Dyskretna i stała energia**
+
+    Utrzymać dyskretną i stałą wartość energii przez całą symulację.
+    W trakcie walki zachować pierwotną logikę przekazywania energii.
+
+6. **Zgeneralizowanie dla różnych funkcji i wymiarów**
+
+    Planować algorytm tak, aby działał dla różnych funkcji celu i różnych wymiarów problemu.
+
+7. **Wykres**
+
+    Na osi x umieścić kolejne iteracje.
+    Na osi y przedstawiać najlepszego agenta (z najwyższą energią) w danej iteracji, czyli minimum, które zostało znalezione do tej pory.
+    
