@@ -7,12 +7,14 @@ import matplotlib.pyplot as plt
 settings = {
     "parameters": {
         "numberOfIterations": 10,
-        "numberOfAgents": 100,
+        "numberOfAgents": 20,
         "minRast": -5.12,
         "maxRast": 5.12,
         "minVec": 0,
         "maxVec": 1.8,
-        "variance_of_vector": 0.5
+        "variance_of_vector": 0.5,
+        "crossover_probability": 0.5,
+        "mutation_probability": 0.25
     },
     "actions": [
         {
@@ -44,9 +46,15 @@ class Agent:
 
     @staticmethod
     def crossover(parent1, parent2):
-        child_x = [parent1.x[i] if random.random() < 0.5 else parent2.x[i] for i in range(len(parent1.x))]
-        child_y = [parent1.y[i] if random.random() < 0.5 else parent2.y[i] for i in range(len(parent1.y))]
-        return child_x, child_y
+        crossover_point = random.randint(1, len(parent1.x) - 1)
+
+        child_x1 = parent1.x[:crossover_point] + parent2.x[crossover_point:]
+        child_y1 = parent1.y[:crossover_point] + parent2.y[crossover_point:]
+
+        child_x2 = parent2.x[:crossover_point] + parent1.x[crossover_point:]
+        child_y2 = parent2.y[:crossover_point] + parent1.y[crossover_point:]
+
+        return child_x1, child_y1, child_x2, child_y2
 
     @staticmethod
     def mutate(x, y):
@@ -61,20 +69,28 @@ class Agent:
         parent1.energy -= parent1.energy * loss_energy
         parent2.energy -= parent2.energy * loss_energy
 
-        # Possible crossover (50%)
-        if random.randint(1, 2) == 1:
-            newborn_x, newborn_y = Agent.crossover(parent1, parent2)
+        # Possible crossover
+        if random.random() < settings["parameters"]["crossover_probability"]:
+            newborn_x1, newborn_y1, newborn_x2, newborn_y2 = Agent.crossover(parent1, parent2)
         else:
-            newborn_x = [random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"]),
+            newborn_x1 = [random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"]),
                          random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"])]
-            newborn_y = [random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"]),
+            newborn_y1 = [random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"]),
+                         random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"])]
+            newborn_x2 = [random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"]),
+                         random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"])]
+            newborn_y2 = [random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"]),
                          random.uniform(settings["parameters"]["minVec"], settings["parameters"]["maxVec"])]
 
-        # Possible mutation (25%)
-        if random.randint(1, 4) == 1:
-            newborn_x, newborn_y = Agent.mutate(newborn_x, newborn_y)
+        # Possible mutation
+        if random.random() < settings["parameters"]["mutation_probability"]:
+            newborn_x1, newborn_y1 = Agent.mutate(newborn_x1, newborn_y1)
+            newborn_x2, newborn_y2 = Agent.mutate(newborn_x2, newborn_y2)
 
-        return Agent(newborn_x, newborn_y)
+        newborn1 = Agent(newborn_x1, newborn_y1)
+        newborn2 = Agent(newborn_x2, newborn_y2)
+
+        return newborn1 if newborn1.energy > newborn2.energy else newborn2
 
     @staticmethod
     def fight(agent_1, agent_2, loss_energy):

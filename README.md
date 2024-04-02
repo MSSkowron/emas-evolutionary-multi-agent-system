@@ -38,7 +38,9 @@
 
 4. **Reprezentacja osobnika jako mającego dyskretną energię i genotyp będący wektorem**
 
-    Kontynuować z wykorzystaniem wektorowej reprezentacji osobnika (np. Agent.x jako wektor współrzędnych x1, x2, ..., xn). Usunąć y, który mamy w klasie `Agent`. Ma być tylko wektor x i energia.
+    Kontynuować z wykorzystaniem wektorowej reprezentacji osobnika (np. Agent.x jako wektor współrzędnych x1, x2, ..., xn). 
+    Usunąć y, który mamy w klasie `Agent`. Ma być tylko wektor x i energia. \
+    Trzeba poprawić przepływ energii żeby działał poprawnie. Aktualnie kod nie działa, bo początkowa energia jest równa wartości funkcji w punkcie x i teraz jak wykonujemy walkę to patrzymy kto ma więcej energii (czyli większość wartość funkcji w punkcie) a chcemy minimalizować a nie makksymalizować. 
 
 5. ~~**Dyskretna i stała energia**~~
 
@@ -47,7 +49,7 @@
 
 6. **Zgeneralizowanie dla różnych funkcji i wymiarów**
 
-    Planować algorytm tak, aby działał dla różnych funkcji celu i różnych wymiarów problemu.
+    Algorytm ma działać dla różnych funkcji i różnych wymiarów.
 
 7. ~~**Wykres**~~
 
