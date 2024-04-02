@@ -8,12 +8,12 @@
 
 ## Plan:
 
-1. **Zmiana operatorów**
+1. ~~**Zmiana operatorów**~~
 
-    Wykorzystać istniejące implementacje operatorów (mutacja, krzyżowanie).
+    ~~Wykorzystać istniejące implementacje operatorów (mutacja, krzyżowanie).
     Można skorzystać z gotowych rozwiązań z jmetal, takich jak sbx (https://github.com/jMetal/jMetalPy/tree/main/jmetal/operator).
     Warto również rozważyć bibliotekę DEAP (https://deap.readthedocs.io/en/master/).
-    Operatory powinny być stosowane zgodnie z podejściem "pipe and filters".
+    Operatory powinny być stosowane zgodnie z podejściem "pipe and filters".~~
 
 2. ~~**Akcje**~~
 
@@ -36,20 +36,20 @@
 
     ~~Na początkowym etapie ograniczyć się do pracy na pojedynczej "wyspie".~~
 
-4. **Reprezentacja osobnika jako mającego dyskretną energię i genotyp będący wektorem**
+4. ~~**Reprezentacja osobnika jako mającego dyskretną energię i genotyp będący wektorem**~~
 
-    Kontynuować z wykorzystaniem wektorowej reprezentacji osobnika (np. Agent.x jako wektor współrzędnych x1, x2, ..., xn). 
+    ~~Kontynuować z wykorzystaniem wektorowej reprezentacji osobnika (np. Agent.x jako wektor współrzędnych x1, x2, ..., xn). 
     Usunąć y, który mamy w klasie `Agent`. Ma być tylko wektor x i energia. \
-    Trzeba poprawić przepływ energii żeby działał poprawnie. Aktualnie kod nie działa, bo początkowa energia jest równa wartości funkcji w punkcie x i teraz jak wykonujemy walkę to patrzymy kto ma więcej energii (czyli większość wartość funkcji w punkcie) a chcemy minimalizować a nie makksymalizować. 
+    Trzeba poprawić przepływ energii żeby działał poprawnie. Aktualnie kod nie działa, bo początkowa energia jest równa wartości funkcji w punkcie x i teraz jak wykonujemy walkę to patrzymy kto ma więcej energii (czyli większość wartość funkcji w punkcie) a chcemy minimalizować a nie makksymalizować.~~
 
 5. ~~**Dyskretna i stała energia**~~
 
     ~~Utrzymać dyskretną i stałą wartość energii przez całą symulację.
     W trakcie walki zachować pierwotną logikę przekazywania energii.~~
 
-6. **Zgeneralizowanie dla różnych funkcji i wymiarów**
+6. ~~**Zgeneralizowanie dla różnych funkcji i wymiarów**~~
 
-    Algorytm ma działać dla różnych funkcji i różnych wymiarów.
+    ~~Algorytm ma działać dla różnych funkcji i różnych wymiarów.~~
 
 7. ~~**Wykres**~~
 
