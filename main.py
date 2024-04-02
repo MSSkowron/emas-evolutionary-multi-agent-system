@@ -65,10 +65,7 @@ class Agent:
         return new_x, new_y
 
     @staticmethod
-    def reproduce(parent1, parent2, loss_energy):
-        parent1.energy -= parent1.energy * loss_energy
-        parent2.energy -= parent2.energy * loss_energy
-
+    def reproduce(parent1, parent2):
         # Possible crossover
         if random.random() < settings["parameters"]["crossover_probability"]:
             newborn_x1, newborn_y1, newborn_x2, newborn_y2 = Agent.crossover(parent1, parent2)
@@ -121,7 +118,6 @@ class EMAS:
     def reproduce(self):
         reproduce_action = next(action for action in settings["actions"] if action["name"] == "reproduce")
         req_energy = reproduce_action.get("reqEnergy", 1)
-        loss_energy = reproduce_action.get("lossEnergy", 0.1)
 
         parents = []
         children = []
@@ -130,7 +126,7 @@ class EMAS:
                 available_parents = [agent for agent in self.agents if agent != parent1 and agent.energy > req_energy and agent not in parents]
                 if available_parents:
                     parent2 = random.choice(available_parents)
-                    children.append(Agent.reproduce(parent1, parent2, loss_energy))
+                    children.append(Agent.reproduce(parent1, parent2))
                     parents.extend([parent1, parent2])
 
         self.agents.extend(children)
