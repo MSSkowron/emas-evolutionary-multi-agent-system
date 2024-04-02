@@ -38,7 +38,7 @@
 
 4. **Reprezentacja osobnika jako mającego dyskretną energię i genotyp będący wektorem**
 
-    Kontynuować z wykorzystaniem wektorowej reprezentacji osobnika (np. Agent.x jako wektor współrzędnych x1, x2, ..., xn).
+    Kontynuować z wykorzystaniem wektorowej reprezentacji osobnika (np. Agent.x jako wektor współrzędnych x1, x2, ..., xn). Usunąć y, który mamy w klasie `Agent`. Ma być tylko wektor x i energia.
 
 5. **Dyskretna i stała energia**
 
