@@ -25,11 +25,6 @@ settings = {
         {
             "name": "reproduce",
             "reqEnergy": 7,
-            "lossEnergy": 0.2
-        },
-        {
-            "name": "migration",
-            "reqEnergy": 9
         }
     ]
 }
