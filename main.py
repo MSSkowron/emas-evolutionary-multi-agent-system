@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 settings = {
     "parameters": {
-        "numberOfIterations": 10,
-        "numberOfAgents": 20,
+        "numberOfIterations": 30,
+        "numberOfAgents": 100,
         "minRast": -5.12,
         "maxRast": 5.12,
         "minVec": 0,
@@ -20,24 +20,24 @@ settings = {
         {
             "name": "fight",
             "reqEnergy": 0,
-            "lossEnergy": 0.1
+            "lossEnergy": 0.01
         },
         {
             "name": "reproduce",
-            "reqEnergy": 7,
-            "lossEnergy": 0.2
+            "reqEnergy": 4,
+            "lossEnergy": 0.05
         }
     ]
 }
 
 
 class Agent:
-    def __init__(self, x, y):
+    def __init__(self, x, y, energy=10):
         self.x = x
         self.y = y
-        self.energy = self.evaluate()
+        self.energy = energy
 
-    def evaluate(self):
+    def fitness(self):
         return rastrigin(self.x)
 
     @staticmethod
@@ -62,8 +62,11 @@ class Agent:
 
     @staticmethod
     def reproduce(parent1, parent2, loss_energy):
-        parent1.energy -= parent1.energy * loss_energy
-        parent2.energy -= parent2.energy * loss_energy
+        parent1_loss = parent1.energy * loss_energy
+        parent1.energy -= parent1_loss
+
+        parent2_loss = parent2.energy * loss_energy
+        parent2.energy -= parent2_loss
 
         # Possible crossover
         if random.random() < settings["parameters"]["crossover_probability"]:
@@ -83,10 +86,10 @@ class Agent:
             newborn_x1, newborn_y1 = Agent.mutate(newborn_x1, newborn_y1)
             newborn_x2, newborn_y2 = Agent.mutate(newborn_x2, newborn_y2)
 
-        newborn1 = Agent(newborn_x1, newborn_y1)
-        newborn2 = Agent(newborn_x2, newborn_y2)
+        newborn1 = Agent(newborn_x1, newborn_y1, parent1_loss + parent2_loss)
+        newborn2 = Agent(newborn_x2, newborn_y2, parent1_loss + parent2_loss)
 
-        return newborn1 if newborn1.energy > newborn2.energy else newborn2
+        return newborn1 if newborn1.fitness() > newborn2.fitness() else newborn2
 
     @staticmethod
     def fight(agent_1, agent_2, loss_energy):
@@ -100,7 +103,7 @@ class Agent:
             agent_2.energy += energy
 
     def is_dead(self):
-        return self.energy < 0
+        return self.energy <= 0
 
 
 class EMAS:
@@ -161,25 +164,23 @@ def main():
 
     data = []
     for it in range(settings["parameters"]["numberOfIterations"]):
-
-        print("Iteration", it)
-
+        print([agent.fitness() for agent in emas.agents])
         emas.run_iteration()
 
-        best_energy, best_agent = math.inf, None
+        best_fitness, best_agent = math.inf, None
         for agent in emas.agents:
-            if agent.energy < best_energy:
-                best_energy = agent.energy
+            if agent.fitness() < best_fitness:
+                best_fitness = agent.fitness()
                 best_agent = agent
 
         if best_agent is not None:
-            data.append((best_agent.x, best_agent.evaluate(), best_agent.energy))
+            data.append((best_agent.x, best_agent.fitness(), best_agent.energy))
 
-    best_energy, best_value, best_agent = math.inf, math.inf, None
+    best_energy, best_value, best_agent = -math.inf, -math.inf, None
     for agent in emas.agents:
-        if agent.energy < best_energy:
+        if agent.energy > best_energy:
             best_energy = agent.energy
-            best_value = agent.evaluate()
+            best_value = agent.fitness()
             best_agent = agent
 
     for i in range(len(best_agent.x)):
