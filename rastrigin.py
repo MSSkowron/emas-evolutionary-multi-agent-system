@@ -3,9 +3,8 @@ import matplotlib.pyplot as plt
 import matplotlib
 
 
-def rastrigin(x, dim=2, a=10):
-    if len(x) != dim:
-        return 0
+def rastrigin(x, a=10):
+    dim = len(x)
     return a * dim + np.sum([(xi ** 2 - a * np.cos(2 * np.pi * xi)) for xi in x])
 
 
