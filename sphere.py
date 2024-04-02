@@ -2,9 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
-def sphere_function(x, dim=2):
-    if len(x) != dim:
-        return 0
+def sphere_function(x):
     return np.sum([xi ** 2 for xi in x])
 
 def generate_points(min_val, max_val, num_points):

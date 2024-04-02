@@ -1,6 +1,7 @@
 import math
 import random
 from rastrigin import rastrigin
+from sphere import sphere_function
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
@@ -41,7 +42,7 @@ class Agent:
         self.energy = energy
 
     def fitness(self):
-        return rastrigin(self.x)
+        return sphere_function(self.x)
 
     @staticmethod
     def crossover(parent1, parent2):
@@ -149,11 +150,11 @@ class Agent:
     @staticmethod
     def fight(agent_1, agent_2, loss_energy):
         if agent_1.fitness() < agent_2.fitness():
-            energy =  math.ceil(max(agent_2.energy * loss_energy,1))
+            energy =  math.ceil(max(agent_2.energy * loss_energy,2))
             agent_1.energy += energy
             agent_2.energy -= energy
         else:
-            energy =  math.ceil(max(agent_1.energy * loss_energy,1))
+            energy =  math.ceil(max(agent_1.energy * loss_energy,2))
             agent_1.energy -= energy
             agent_2.energy += energy
 
