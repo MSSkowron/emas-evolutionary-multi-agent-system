@@ -40,10 +40,10 @@
 
     Kontynuować z wykorzystaniem wektorowej reprezentacji osobnika (np. Agent.x jako wektor współrzędnych x1, x2, ..., xn). Usunąć y, który mamy w klasie `Agent`. Ma być tylko wektor x i energia.
 
-5. **Dyskretna i stała energia**
+5. ~~**Dyskretna i stała energia**~~
 
-    Utrzymać dyskretną i stałą wartość energii przez całą symulację.
-    W trakcie walki zachować pierwotną logikę przekazywania energii.
+    ~~Utrzymać dyskretną i stałą wartość energii przez całą symulację.
+    W trakcie walki zachować pierwotną logikę przekazywania energii.~~
 
 6. **Zgeneralizowanie dla różnych funkcji i wymiarów**
 
