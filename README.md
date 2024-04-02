@@ -15,22 +15,22 @@
     Warto również rozważyć bibliotekę DEAP (https://deap.readthedocs.io/en/master/).
     Operatory powinny być stosowane zgodnie z podejściem "pipe and filters".
 
-2. **Akcje**
+2. ~~**Akcje**~~
 
-    W każdej iteracji jest wywoływane po kolei:
+    ~~W każdej iteracji jest wywoływane po kolei:~~
 
-   - Reprodukcja 
+   ~~1. - Reprodukcja~~ 
    
-       Dla każdego osobnika losujemy z pozostałych osobników partnera do reprodukcji.
-       Reprodukcja wymaga jakiejś minimalnej energii, która jest parametryzowalna (tak jak mieliśmy wcześniej).
-       Reprodukcja zabiera rodzicom troche ich energii, która jest przekazywana dziecku.
+    ~~Dla każdego osobnika losujemy z pozostałych osobników partnera do reprodukcji.
+     Reprodukcja wymaga jakiejś minimalnej energii, która jest parametryzowalna (tak jak mieliśmy wcześniej).
+     Reprodukcja zabiera rodzicom troche ich energii, która jest przekazywana dziecku.~~
 
-   - Walka
+   ~~2. - Walka~~
    
-       Dla każdego osobnika losujemy z pozostałych osobników przeciwnika do walki.
-       W wyniku walki nastepuje przepływ energii jeden traci drugi zyskuje (energia w układzie musi być stała!)
+     ~~Dla każdego osobnika losujemy z pozostałych osobników przeciwnika do walki.
+     W wyniku walki nastepuje przepływ energii jeden traci drugi zyskuje (energia w układzie musi być stała!)~~
 
-   - Sprzątanie zmarłych
+   ~~3. - Sprzątanie zmarłych~~
     
 3. ~~**Usunięcie migracji**~~
 
