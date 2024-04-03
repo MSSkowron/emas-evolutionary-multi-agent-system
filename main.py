@@ -14,8 +14,6 @@ settings = {
         "dimensions": 2,
         "minRast": -5.12,
         "maxRast": 5.12,
-        "minVec": 0,
-        "maxVec": 1.8,
         "minFightEnergyLoss": 5,
         "mutation_probability": 0.5,
         "mutation_element_probability": 0.5,
