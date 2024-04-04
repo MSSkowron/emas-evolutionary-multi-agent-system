@@ -73,9 +73,13 @@ class Agent:
             for i_chromosome in range(n):
                 if not c1 < i_chromosome < c2:
                     for i_son in range(2):
-                        if _repeated(swapped[i_son][i_chromosome], swapped[i_son]):
-                            map_index = map_[i_son].index(swapped[i_son][i_chromosome])
-                            swapped[i_son][i_chromosome] = map_[1 - i_son][map_index]
+                        while _repeated(swapped[i_son][i_chromosome], swapped[i_son]):
+                            try:
+                                map_index = map_[i_son].index(swapped[i_son][i_chromosome])
+                                swapped[i_son][i_chromosome] = map_[1 - i_son][map_index]
+                            except ValueError as ve:
+                                print('ValueError encountered, Action skipped')
+                                break
             return s1, s2
 
         swapped = _swap(parents[0].x, parents[1].x, cross_points)
