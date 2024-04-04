@@ -18,7 +18,8 @@ settings = {
         "mutation_probability": 0.5,
         "mutation_element_probability": 0.5,
         "crossover_probability": 0.5,
-        "distribution_index": 0.2
+        "distribution_index": 0.2,
+        "fitness_function": rastrigin
     },
     "actions": [
         {
@@ -41,7 +42,7 @@ class Agent:
         self.energy = energy
 
     def fitness(self):
-        return rastrigin(self.x)
+        return settings["parameters"]["fitness_function"](self.x)
 
     @staticmethod
     def crossover(parent1, parent2):
@@ -295,6 +296,8 @@ def main():
     ax[1, 1].set_ylabel("Max energy")
     ax[1, 1].grid()
 
+    plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9,  wspace=0.3, hspace=0.3)
+    fig.suptitle(settings["parameters"]["fitness_function"].__name__ + ' minimization', fontsize=14)
     plt.show()
 
 
