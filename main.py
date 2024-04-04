@@ -145,7 +145,7 @@ class Agent:
         newborn1 = Agent(newborn_x1, parent1_loss + parent2_loss)
         newborn2 = Agent(newborn_x2, parent1_loss + parent2_loss)
 
-        return newborn1 if newborn1.fitness() > newborn2.fitness() else newborn2
+        return newborn1 if newborn1.fitness() < newborn2.fitness() else newborn2
 
     @staticmethod
     def fight(agent_1, agent_2, loss_energy):
