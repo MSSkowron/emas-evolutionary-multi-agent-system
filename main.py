@@ -9,9 +9,9 @@ import copy
 settings = {
     "parameters": {
         "startEnergy": 100,
-        "numberOfIterations": 40,
-        "numberOfAgents": 100,
-        "dimensions": 2,
+        "numberOfIterations": 600,
+        "numberOfAgents": 30,
+        "dimensions": 20,
         "minRast": -5.12,
         "maxRast": 5.12,
         "minFightEnergyLoss": 5,

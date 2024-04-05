@@ -55,3 +55,12 @@
 
     ~~Na osi x umieścić kolejne iteracje.
     Na osi y przedstawiać najlepszego agenta (z najwyższą energią) w danej iteracji, czyli minimum, które zostało znalezione do tej pory.~~
+
+
+# przekazywana energia
+# odchylenie
+# liczba urodzeń i zgonów co iterację
+
+# mutacja adaptacyjna
+# 5 sukcesów
+# irace pobawić się
