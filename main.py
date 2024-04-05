@@ -9,13 +9,13 @@ import copy
 settings = {
     "parameters": {
         "startEnergy": 100,
-        "numberOfIterations": 600,
+        "numberOfIterations": 60,
         "numberOfAgents": 30,
         "dimensions": 20,
         "minRast": -5.12,
         "maxRast": 5.12,
-        "minFightEnergyLoss": 5,
-        "mutation_probability": 0.5,
+        "minFightEnergyLoss": 20,
+        "mutation_probability": 1,
         "mutation_element_probability": 0.5,
         "crossover_probability": 0.5,
         "distribution_index": 0.2,
@@ -25,11 +25,11 @@ settings = {
         {
             "name": "fight",
             "reqEnergy": 0,
-            "lossEnergy": 0.1
+            "lossEnergy": 0.25
         },
         {
             "name": "reproduce",
-            "reqEnergy": 40,
+            "reqEnergy": 30,
             "lossEnergy": 0.1
         }
     ]
@@ -137,10 +137,8 @@ class Agent:
             newborns = Agent.crossover(parent1, parent2)
             newborn_x1, newborn_x2 = newborns[0], newborns[1]
         else:
-            newborn_x1 = [random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"]) for _ in
-                          range(settings["parameters"]["dimensions"])]
-            newborn_x2 = [random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"]) for _ in
-                          range(settings["parameters"]["dimensions"])]
+            newborns = Agent.crossover(parent2, parent1)
+            newborn_x1, newborn_x2 = newborns[0], newborns[1]
 
         # Possible mutation
         if random.random() < settings["parameters"]["mutation_probability"]:
@@ -236,6 +234,15 @@ def main():
 
     for it in range(settings["parameters"]["numberOfIterations"]):
         born_num, dead_num = emas.run_iteration()
+        print(len(emas.agents))
+
+        vectors = []
+        for agent in emas.agents:
+            vectors.append(agent.x)
+        vectors = np.array(vectors)
+        std = np.std(vectors, axis=0)
+        min_std = min(std)
+        max_std = max(std)
 
         total_number_of_born += born_num
         total_number_of_dead += dead_num
@@ -249,7 +256,7 @@ def main():
 
         if best_agent:
             data.append((best_agent.x, np.average([agent.fitness() for agent in emas.agents]), best_fitness,
-                         np.average([agent.energy for agent in emas.agents]), best_agent.energy))
+                         np.average([agent.energy for agent in emas.agents]), best_agent.energy, born_num, dead_num, min_std, max_std))
 
     best_fitness, best_agent = math.inf, None
     for agent in emas.agents:
@@ -271,8 +278,12 @@ def main():
     min_fitness_data = [item[2] for item in data]
     avg_energy_data = [item[3] for item in data]
     max_energy_data = [item[4] for item in data]
+    amount_of_born_data = [ item[5] for item in data ]
+    amount_of_dead_data = [ item[6] for item in data ]
+    min_std_data = [ item[7] for item in data ]
+    max_std_data = [ item[8] for item in data ]
 
-    fig, ax = plt.subplots(2, 2)
+    fig, ax = plt.subplots(4, 2)
     fig.set_figheight(20)
     fig.set_figwidth(20)
 
@@ -299,6 +310,30 @@ def main():
     ax[1, 1].set_xlabel("Iteration")
     ax[1, 1].set_ylabel("Max energy")
     ax[1, 1].grid()
+
+    ax[2, 0].plot(iteration_data, amount_of_born_data, marker='o', linestyle='-')
+    ax[2, 0].set_title("Amount of born for each iteration")
+    ax[2, 0].set_xlabel("Iteration")
+    ax[2, 0].set_ylabel("Born")
+    ax[2, 0].grid()
+
+    ax[2, 1].plot(iteration_data, amount_of_dead_data, marker='o', linestyle='-')
+    ax[2, 1].set_title("Amount of dead for each iteration")
+    ax[2, 1].set_xlabel("Iteration")
+    ax[2, 1].set_ylabel("Dead")
+    ax[2, 1].grid()
+
+    ax[3, 0].plot(iteration_data, min_std_data, marker='o', linestyle='-')
+    ax[3, 0].set_title("Min standart deviation for each iteration")
+    ax[3, 0].set_xlabel("Iteration")
+    ax[3, 0].set_ylabel("min std")
+    ax[3, 0].grid()
+
+    ax[3, 1].plot(iteration_data, max_std_data, marker='o', linestyle='-')
+    ax[3, 1].set_title("Max standart deviation for each iteration")
+    ax[3, 1].set_xlabel("Iteration")
+    ax[3, 1].set_ylabel("min std")
+    ax[3, 1].grid()
 
     plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9,  wspace=0.3, hspace=0.3)
     fig.suptitle(settings["parameters"]["fitness_function"].__name__ + ' minimization', fontsize=14)
