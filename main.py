@@ -233,21 +233,19 @@ def main():
     data = []
 
     for it in range(settings["parameters"]["numberOfIterations"]):
+        # Number of agents, born agents and dead agents
         born_num, dead_num = emas.run_iteration()
-
         total_number_of_born += born_num
         total_number_of_dead += dead_num
-
         agents_num = len(emas.agents)
 
-        vectors = []
-        for agent in emas.agents:
-            vectors.append(agent.x)
-        vectors = np.array(vectors)
+        # Min and Max standard deviations along each dimension for agents
+        vectors = np.array([agent.x for agent in emas.agents])
         std = np.std(vectors, axis=0)
         min_std = min(std)
         max_std = max(std)
 
+        # Best agent based on its fitness
         best_agent = None
         for agent in emas.agents:
             if best_agent is None:
@@ -256,6 +254,7 @@ def main():
                 if agent.fitness() < best_agent.fitness():
                     best_agent = agent
 
+        # Add data
         if best_agent:
             data.append((
                  agents_num,
