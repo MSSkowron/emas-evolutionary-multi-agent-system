@@ -246,39 +246,20 @@ def main():
         max_std = max(std)
 
         # Best agent based on its fitness
-        best_agent = None
-        for agent in emas.agents:
-            if best_agent is None:
-                best_agent = agent
-            else:
-                if agent.fitness() < best_agent.fitness():
-                    best_agent = agent
+        best_agent = min(emas.agents, key=lambda agent: agent.fitness())
 
         # Add data
-        if best_agent:
-            data.append((
-                 agents_num,
-                 born_num,
-                 dead_num,
-                 best_agent.fitness(),
-                 np.average([agent.fitness() for agent in emas.agents]),
-                 best_agent.energy,
-                 np.average([agent.energy for agent in emas.agents]),
-                 min_std,
-                 max_std
-            ))
-        else:
-            data.append((
-                 agents_num,
-                 born_num,
-                 dead_num,
-                 0,
-                 np.average([agent.fitness() for agent in emas.agents]),
-                 0,
-                 np.average([agent.energy for agent in emas.agents]),
-                 min_std,
-                 max_std
-            ))
+        data.append((
+            agents_num,
+            born_num,
+            dead_num,
+            best_agent.fitness(),
+            np.average([agent.fitness() for agent in emas.agents]),
+            best_agent.energy,
+            np.average([agent.energy for agent in emas.agents]),
+            min_std,
+            max_std
+        ))
 
     print("Number of agents left:", len(emas.agents))
     print()
@@ -286,13 +267,7 @@ def main():
     print("Total number of dead agents:", total_number_of_dead)
     print()
 
-    best_agent = None
-    for agent in emas.agents:
-        if best_agent is None:
-            best_agent = agent
-        else:
-            if agent.fitness() < best_agent.fitness():
-                best_agent = agent
+    best_agent = min(emas.agents, key=lambda agent: agent.fitness())
 
     for i in range(len(best_agent.x)):
         best_agent.x[i] = round(best_agent.x[i], 2)
@@ -300,7 +275,7 @@ def main():
     print(
         f"Minimum in {best_agent.x} equals = {best_agent.fitness():.2f} for agent with energy equals = {best_agent.energy:.2f}")
 
-    iteration_data = [i for i in range(len(data))]
+    iteration_data = list(range(len(data)))
     number_of_agents = [item[0] for item in data]
     number_of_born_agents = [item[1] for item in data]
     number_of_dead_agents = [item[2] for item in data]
