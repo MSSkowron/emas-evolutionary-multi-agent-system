@@ -9,9 +9,9 @@ import copy
 settings = {
     "parameters": {
         "startEnergy": 100,
-        "numberOfIterations": 200,
-        "numberOfAgents": 40,
-        "dimensions": 20,
+        "numberOfIterations": 500,
+        "numberOfAgents": 50,
+        "dimensions": 200,
         "minRast": -5.12,
         "maxRast": 5.12,
         "minFightEnergyLoss": 20,
@@ -19,7 +19,7 @@ settings = {
         "mutation_element_probability": 0.5,
         "crossover_probability": 0.5,
         "distribution_index": 0.2,
-        "fitness_function": rastrigin
+        "fitness_function": sphere_function
     },
     "actions": [
         {
@@ -40,9 +40,7 @@ class Agent:
     def __init__(self, x, energy=settings["parameters"]["startEnergy"]):
         self.x = x
         self.energy = energy
-
-    def fitness(self):
-        return settings["parameters"]["fitness_function"](self.x)
+        self.fitness = settings["parameters"]["fitness_function"](x)
 
     @staticmethod
     def crossover(parent1, parent2):
@@ -88,7 +86,6 @@ class Agent:
         offspring[0].x, offspring[1].x = mapped
 
         return offspring[0].x, offspring[1].x
-        
 
     @staticmethod
     def mutate(x):
@@ -162,11 +159,11 @@ class Agent:
         newborn1 = Agent(newborn_x1, parent1_loss + parent2_loss)
         newborn2 = Agent(newborn_x2, parent1_loss + parent2_loss)
 
-        return newborn1 if newborn1.fitness() < newborn2.fitness() else newborn2
+        return newborn1 if newborn1.fitness < newborn2.fitness else newborn2
 
     # @staticmethod
     # def fight(agent_1, agent_2, loss_energy):
-    #     if agent_1.fitness() < agent_2.fitness():
+    #     if agent_1.fitness < agent_2.fitness:
     #         energy = math.ceil(max(agent_2.energy * loss_energy, settings["parameters"]["minFightEnergyLoss"]))
     #         agent_1.energy += energy
     #         agent_2.energy -= energy
@@ -177,7 +174,7 @@ class Agent:
 
     @staticmethod
     def fight(agent_1, agent_2, loss_energy):
-        if agent_1.fitness() < agent_2.fitness():
+        if agent_1.fitness < agent_2.fitness:
             energy = agent_2.energy
             agent_1.energy += energy
             agent_2.energy -= energy
@@ -217,7 +214,7 @@ class EMAS:
                                      agent != parent1 and agent.energy > req_energy and agent not in parents]
                 if available_parents:
                     parent2 = random.choice(available_parents)
-                    children.append(Agent.reproduce(parent1, parent2, loss_energy, np.average([agent.fitness() for agent in self.agents])))
+                    children.append(Agent.reproduce(parent1, parent2, loss_energy, np.average([agent.fitness for agent in self.agents])))
                     parents.extend([parent1, parent2])
 
         return children
@@ -260,9 +257,6 @@ def main():
     for it in range(settings["parameters"]["numberOfIterations"]):
         # Number of agents, born agents and dead agents
         born_num, dead_num = emas.run_iteration()
-        # print(born_num, dead_num)
-        if it%10==0:
-            print(it)
         total_number_of_born += born_num
         total_number_of_dead += dead_num
         agents_num = len(emas.agents)
@@ -274,7 +268,7 @@ def main():
         max_std = max(std)
 
         # Best agent based on its fitness
-        best_agent = min(emas.agents, key=lambda agent: agent.fitness())
+        best_agent = min(emas.agents, key=lambda agent: agent.fitness)
 
         # print(it, agents_num)
 
@@ -283,8 +277,8 @@ def main():
             agents_num,
             born_num,
             dead_num,
-            best_agent.fitness(),
-            np.average([agent.fitness() for agent in emas.agents]),
+            best_agent.fitness,
+            np.average([agent.fitness for agent in emas.agents]),
             best_agent.energy,
             np.average([agent.energy for agent in emas.agents]),
             min_std,
@@ -297,12 +291,12 @@ def main():
     print("Total number of dead agents:", total_number_of_dead)
     print()
 
-    best_agent = min(emas.agents, key=lambda agent: agent.fitness())
+    best_agent = min(emas.agents, key=lambda agent: agent.fitness)
 
     for i in range(len(best_agent.x)):
         best_agent.x[i] = round(best_agent.x[i], 2)
 
-    output = f"Minimum in {best_agent.x} equals = {best_agent.fitness():.2f} for agent with energy equals = {best_agent.energy:.2f}"
+    output = f"Minimum in {best_agent.x} equals = {best_agent.fitness:.2f} for agent with energy equals = {best_agent.energy:.2f}"
     print(output)
 
     iteration_data = list(range(len(data)))
