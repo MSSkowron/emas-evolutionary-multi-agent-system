@@ -9,8 +9,8 @@ import copy
 settings = {
     "parameters": {
         "startEnergy": 100,
-        "numberOfIterations": 60,
-        "numberOfAgents": 30,
+        "numberOfIterations": 50,
+        "numberOfAgents": 50,
         "dimensions": 20,
         "minRast": -5.12,
         "maxRast": 5.12,
@@ -30,7 +30,7 @@ settings = {
         {
             "name": "reproduce",
             "reqEnergy": 30,
-            "lossEnergy": 0.1
+            "lossEnergy": 0.3
         }
     ]
 }
@@ -94,7 +94,7 @@ class Agent:
         for i in range(len(x)):
             rand = random.random()
 
-            if rand <= settings["parameters"]["mutation_element_probability"]:
+            if rand <= 1/len(x):
                 y = x[i]
                 yl, yu = settings["parameters"]["minRast"], settings["parameters"]["maxRast"]
 
@@ -125,7 +125,7 @@ class Agent:
         return x
 
     @staticmethod
-    def reproduce(parent1, parent2, loss_energy):
+    def reproduce(parent1, parent2, loss_energy, f_avg):
         parent1_loss = math.ceil(parent1.energy * loss_energy)
         parent1.energy -= parent1_loss
 
@@ -140,9 +140,21 @@ class Agent:
             newborns = Agent.crossover(parent2, parent1)
             newborn_x1, newborn_x2 = newborns[0], newborns[1]
 
-        # Possible mutation
-        if random.random() < settings["parameters"]["mutation_probability"]:
+        mutation_probability_x1 = mutation_probability_x2 = settings["parameters"]["mutation_probability"]
+        if settings["parameters"]["fitness_function"](newborn_x1) < f_avg:
+            mutation_probability_x1 /= 2
+        else:
+            mutation_probability_x1 *= 2
+
+        if settings["parameters"]["fitness_function"](newborn_x2) < f_avg:
+            mutation_probability_x2 /= 2
+        else:
+            mutation_probability_x2 *= 2
+
+        random_number = random.random()
+        if random_number < mutation_probability_x1:
             newborn_x1 = Agent.mutate(newborn_x1)
+        if random_number < mutation_probability_x2:
             newborn_x2 = Agent.mutate(newborn_x2)
 
         newborn1 = Agent(newborn_x1, parent1_loss + parent2_loss)
@@ -192,7 +204,7 @@ class EMAS:
                                      agent != parent1 and agent.energy > req_energy and agent not in parents]
                 if available_parents:
                     parent2 = random.choice(available_parents)
-                    children.append(Agent.reproduce(parent1, parent2, loss_energy))
+                    children.append(Agent.reproduce(parent1, parent2, loss_energy, np.average([agent.fitness() for agent in self.agents])))
                     parents.extend([parent1, parent2])
 
         return children
@@ -247,6 +259,8 @@ def main():
 
         # Best agent based on its fitness
         best_agent = min(emas.agents, key=lambda agent: agent.fitness())
+
+        print(it, agents_num)
 
         # Add data
         data.append((
