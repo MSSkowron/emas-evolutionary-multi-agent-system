@@ -30,7 +30,7 @@
 
 3. ~~Wizualizacja liczby urodzeń i zgonów w każdej iteracji~~.
 
-4. **Analiza metod mutacji**. 
+4. ~~Analiza metod mutacji~~. 
 
     Mutacja adaptacyjna, Metoda 5 sukcesów.
 
