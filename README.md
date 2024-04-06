@@ -10,9 +10,9 @@
 
 ## Plan:
 
-1. **Analiza przepływu energii w systemie**.
+1. ~~Analiza przepływu energii w systemie~~.
 
-2. **Wizualizacja odchyleń w genotypach**.
+2. ~~Wizualizacja odchyleń w genotypach~~.
     
     Przedstawienie genotypów:
     ```
@@ -28,7 +28,7 @@
     ```
 
 
-3. **Wizualizacja liczby urodzeń i zgonów w każdej iteracji**.
+3. ~~Wizualizacja liczby urodzeń i zgonów w każdej iteracji~~.
 
 4. **Analiza metod mutacji**. 
 

@@ -234,7 +234,11 @@ def main():
 
     for it in range(settings["parameters"]["numberOfIterations"]):
         born_num, dead_num = emas.run_iteration()
-        print(len(emas.agents))
+
+        total_number_of_born += born_num
+        total_number_of_dead += dead_num
+
+        agents_num = len(emas.agents)
 
         vectors = []
         for agent in emas.agents:
@@ -244,98 +248,129 @@ def main():
         min_std = min(std)
         max_std = max(std)
 
-        total_number_of_born += born_num
-        total_number_of_dead += dead_num
-
-        best_fitness, best_agent = math.inf, None
+        best_agent = None
         for agent in emas.agents:
-            fitness = agent.fitness()
-            if fitness < best_fitness:
-                best_fitness = fitness
+            if best_agent is None:
                 best_agent = agent
+            else:
+                if agent.fitness() < best_agent.fitness():
+                    best_agent = agent
 
         if best_agent:
-            data.append((best_agent.x, np.average([agent.fitness() for agent in emas.agents]), best_fitness,
-                         np.average([agent.energy for agent in emas.agents]), best_agent.energy, born_num, dead_num, min_std, max_std))
+            data.append((
+                 agents_num,
+                 born_num,
+                 dead_num,
+                 best_agent.fitness(),
+                 np.average([agent.fitness() for agent in emas.agents]),
+                 best_agent.energy,
+                 np.average([agent.energy for agent in emas.agents]),
+                 min_std,
+                 max_std
+            ))
+        else:
+            data.append((
+                 agents_num,
+                 born_num,
+                 dead_num,
+                 0,
+                 np.average([agent.fitness() for agent in emas.agents]),
+                 0,
+                 np.average([agent.energy for agent in emas.agents]),
+                 min_std,
+                 max_std
+            ))
 
-    best_fitness, best_agent = math.inf, None
+    print("Number of agents left:", len(emas.agents))
+    print()
+    print("Total number of born agents:", total_number_of_born)
+    print("Total number of dead agents:", total_number_of_dead)
+    print()
+
+    best_agent = None
     for agent in emas.agents:
-        fitness = agent.fitness()
-        if fitness < best_fitness:
-            best_fitness = fitness
+        if best_agent is None:
             best_agent = agent
+        else:
+            if agent.fitness() < best_agent.fitness():
+                best_agent = agent
 
     for i in range(len(best_agent.x)):
         best_agent.x[i] = round(best_agent.x[i], 2)
 
-    print("Total number of born agents:", total_number_of_born)
-    print("Total number of dead agents:", total_number_of_dead)
-    print()
-    print(f"Minimum in {best_agent.x} equals = {best_fitness:.2f} for agent with energy equals = {best_agent.energy:.2f}")
+    print(
+        f"Minimum in {best_agent.x} equals = {best_agent.fitness():.2f} for agent with energy equals = {best_agent.energy:.2f}")
 
-    iteration_data = [i + 1 for i in range(len(data))]
-    avg_fitness_data = [item[1] for item in data]
-    min_fitness_data = [item[2] for item in data]
-    avg_energy_data = [item[3] for item in data]
-    max_energy_data = [item[4] for item in data]
-    amount_of_born_data = [ item[5] for item in data ]
-    amount_of_dead_data = [ item[6] for item in data ]
-    min_std_data = [ item[7] for item in data ]
-    max_std_data = [ item[8] for item in data ]
+    iteration_data = [i for i in range(len(data))]
+    number_of_agents = [item[0] for item in data]
+    number_of_born_agents = [item[1] for item in data]
+    number_of_dead_agents = [item[2] for item in data]
+    best_fitness = [item[3] for item in data]
+    avg_fitness = [item[4] for item in data]
+    best_energy = [item[5] for item in data]
+    avg_energy = [item[6] for item in data]
+    min_std = [item[7] for item in data]
+    max_std = [item[8] for item in data]
 
-    fig, ax = plt.subplots(4, 2)
-    fig.set_figheight(20)
+    fig, ax = plt.subplots(5, 2)
+    fig.set_figheight(30)
     fig.set_figwidth(20)
 
-    ax[0, 0].plot(iteration_data, avg_fitness_data, marker='o', linestyle='-')
-    ax[0, 0].set_title("Average fitness for each iteration")
+    ax[0, 0].plot(iteration_data, number_of_agents, marker='o', linestyle='-')
+    ax[0, 0].set_title("Number of agents after each iterations")
     ax[0, 0].set_xlabel("Iteration")
-    ax[0, 0].set_ylabel("Avg fitness")
+    ax[0, 0].set_ylabel("Number of agents")
     ax[0, 0].grid()
 
-    ax[1, 0].plot(iteration_data, min_fitness_data, marker='o', linestyle='-')
-    ax[1, 0].set_title("Min fitness for each iteration")
+    ax[1, 0].plot(iteration_data, number_of_born_agents, marker='o', linestyle='-')
+    ax[1, 0].set_title("Number of born agents after each iteration")
     ax[1, 0].set_xlabel("Iteration")
-    ax[1, 0].set_ylabel("Min fitness")
+    ax[1, 0].set_ylabel("Born")
     ax[1, 0].grid()
 
-    ax[0, 1].plot(iteration_data, avg_energy_data, marker='o', linestyle='-')
-    ax[0, 1].set_title("Average energy for each iteration")
-    ax[0, 1].set_xlabel("Iteration")
-    ax[0, 1].set_ylabel("Avg energy")
-    ax[0, 1].grid()
-
-    ax[1, 1].plot(iteration_data, max_energy_data, marker='o', linestyle='-')
-    ax[1, 1].set_title("Max energy for each iteration")
+    ax[1, 1].plot(iteration_data, number_of_dead_agents, marker='o', linestyle='-')
+    ax[1, 1].set_title("Number of dead agents after each iteration")
     ax[1, 1].set_xlabel("Iteration")
-    ax[1, 1].set_ylabel("Max energy")
+    ax[1, 1].set_ylabel("Dead")
     ax[1, 1].grid()
 
-    ax[2, 0].plot(iteration_data, amount_of_born_data, marker='o', linestyle='-')
-    ax[2, 0].set_title("Amount of born for each iteration")
+    ax[2, 0].plot(iteration_data, best_fitness, marker='o', linestyle='-')
+    ax[2, 0].set_title("Best fitness after each iteration")
     ax[2, 0].set_xlabel("Iteration")
-    ax[2, 0].set_ylabel("Born")
+    ax[2, 0].set_ylabel("Best fitness")
     ax[2, 0].grid()
 
-    ax[2, 1].plot(iteration_data, amount_of_dead_data, marker='o', linestyle='-')
-    ax[2, 1].set_title("Amount of dead for each iteration")
+    ax[2, 1].plot(iteration_data, avg_fitness, marker='o', linestyle='-')
+    ax[2, 1].set_title("Average fitness after each iteration")
     ax[2, 1].set_xlabel("Iteration")
-    ax[2, 1].set_ylabel("Dead")
+    ax[2, 1].set_ylabel("Avg fitness")
     ax[2, 1].grid()
 
-    ax[3, 0].plot(iteration_data, min_std_data, marker='o', linestyle='-')
-    ax[3, 0].set_title("Min standart deviation for each iteration")
+    ax[3, 0].plot(iteration_data, best_energy, marker='o', linestyle='-')
+    ax[3, 0].set_title("Best energy after each iteration")
     ax[3, 0].set_xlabel("Iteration")
-    ax[3, 0].set_ylabel("min std")
+    ax[3, 0].set_ylabel("Best energy")
     ax[3, 0].grid()
 
-    ax[3, 1].plot(iteration_data, max_std_data, marker='o', linestyle='-')
-    ax[3, 1].set_title("Max standart deviation for each iteration")
+    ax[3, 1].plot(iteration_data, avg_energy, marker='o', linestyle='-')
+    ax[3, 1].set_title("Average energy after each iteration")
     ax[3, 1].set_xlabel("Iteration")
-    ax[3, 1].set_ylabel("min std")
+    ax[3, 1].set_ylabel("Avg energy")
     ax[3, 1].grid()
 
-    plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9,  wspace=0.3, hspace=0.3)
+    ax[4, 0].plot(iteration_data, min_std, marker='o', linestyle='-')
+    ax[4, 0].set_title("Min standard deviation after each iteration")
+    ax[4, 0].set_xlabel("Iteration")
+    ax[4, 0].set_ylabel("min std")
+    ax[4, 0].grid()
+
+    ax[4, 1].plot(iteration_data, max_std, marker='o', linestyle='-')
+    ax[4, 1].set_title("Max standard deviation after each iteration")
+    ax[4, 1].set_xlabel("Iteration")
+    ax[4, 1].set_ylabel("max std")
+    ax[4, 1].grid()
+
+    plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0.3, hspace=0.3)
     fig.suptitle(settings["parameters"]["fitness_function"].__name__ + ' minimization', fontsize=14)
     plt.show()
 
