@@ -1,0 +1,5 @@
+parameters:{'startEnergy': 100, 'numberOfIterations': 200, 'numberOfAgents': 40, 'dimensions': 20, 'minRast': -5.12, 'maxRast': 5.12, 'minFightEnergyLoss': 20, 'mutation_probability': 0.5, 'mutation_element_probability': 0.5, 'crossover_probability': 0.5, 'distribution_index': 0.2, 'fitness_function': <function rastrigin at 0x000001C7C40354E0>}
+actions:[{'name': 'fight', 'reqEnergy': 0, 'lossEnergy': 0.2}, {'name': 'reproduce', 'reqEnergy': 0, 'lossEnergy': 0.25}]
+Minimum in [-1.0, 0.96, -1.97, 0.01, 0.06, 0.02, -0.08, 0.08, -0.04, -0.95, -1.0, -1.01, -1.04, -0.05, -0.97, 0.04, 0.04, 0.02, -0.05, -1.01] equals = 18.58 for agent with energy equals = 55.00
+
+

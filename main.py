@@ -9,13 +9,13 @@ import copy
 settings = {
     "parameters": {
         "startEnergy": 100,
-        "numberOfIterations": 50,
-        "numberOfAgents": 50,
+        "numberOfIterations": 200,
+        "numberOfAgents": 40,
         "dimensions": 20,
         "minRast": -5.12,
         "maxRast": 5.12,
         "minFightEnergyLoss": 20,
-        "mutation_probability": 1,
+        "mutation_probability": 0.5,
         "mutation_element_probability": 0.5,
         "crossover_probability": 0.5,
         "distribution_index": 0.2,
@@ -25,12 +25,12 @@ settings = {
         {
             "name": "fight",
             "reqEnergy": 0,
-            "lossEnergy": 0.25
+            "lossEnergy": 0.2
         },
         {
             "name": "reproduce",
-            "reqEnergy": 30,
-            "lossEnergy": 0.3
+            "reqEnergy": 0,
+            "lossEnergy": 0.25
         }
     ]
 }
@@ -88,6 +88,7 @@ class Agent:
         offspring[0].x, offspring[1].x = mapped
 
         return offspring[0].x, offspring[1].x
+        
 
     @staticmethod
     def mutate(x):
@@ -141,6 +142,7 @@ class Agent:
             newborn_x1, newborn_x2 = newborns[0], newborns[1]
 
         mutation_probability_x1 = mutation_probability_x2 = settings["parameters"]["mutation_probability"]
+
         if settings["parameters"]["fitness_function"](newborn_x1) < f_avg:
             mutation_probability_x1 /= 2
         else:
@@ -162,14 +164,25 @@ class Agent:
 
         return newborn1 if newborn1.fitness() < newborn2.fitness() else newborn2
 
+    # @staticmethod
+    # def fight(agent_1, agent_2, loss_energy):
+    #     if agent_1.fitness() < agent_2.fitness():
+    #         energy = math.ceil(max(agent_2.energy * loss_energy, settings["parameters"]["minFightEnergyLoss"]))
+    #         agent_1.energy += energy
+    #         agent_2.energy -= energy
+    #     else:
+    #         energy = math.ceil(max(agent_1.energy * loss_energy, settings["parameters"]["minFightEnergyLoss"]))
+    #         agent_1.energy -= energy
+    #         agent_2.energy += energy
+
     @staticmethod
     def fight(agent_1, agent_2, loss_energy):
         if agent_1.fitness() < agent_2.fitness():
-            energy = math.ceil(max(agent_2.energy * loss_energy, settings["parameters"]["minFightEnergyLoss"]))
+            energy = agent_2.energy
             agent_1.energy += energy
             agent_2.energy -= energy
         else:
-            energy = math.ceil(max(agent_1.energy * loss_energy, settings["parameters"]["minFightEnergyLoss"]))
+            energy = agent_1.energy
             agent_1.energy -= energy
             agent_2.energy += energy
 
@@ -247,6 +260,9 @@ def main():
     for it in range(settings["parameters"]["numberOfIterations"]):
         # Number of agents, born agents and dead agents
         born_num, dead_num = emas.run_iteration()
+        # print(born_num, dead_num)
+        if it%10==0:
+            print(it)
         total_number_of_born += born_num
         total_number_of_dead += dead_num
         agents_num = len(emas.agents)
@@ -260,7 +276,7 @@ def main():
         # Best agent based on its fitness
         best_agent = min(emas.agents, key=lambda agent: agent.fitness())
 
-        print(it, agents_num)
+        # print(it, agents_num)
 
         # Add data
         data.append((
@@ -286,8 +302,8 @@ def main():
     for i in range(len(best_agent.x)):
         best_agent.x[i] = round(best_agent.x[i], 2)
 
-    print(
-        f"Minimum in {best_agent.x} equals = {best_agent.fitness():.2f} for agent with energy equals = {best_agent.energy:.2f}")
+    output = f"Minimum in {best_agent.x} equals = {best_agent.fitness():.2f} for agent with energy equals = {best_agent.energy:.2f}"
+    print(output)
 
     iteration_data = list(range(len(data)))
     number_of_agents = [item[0] for item in data]
@@ -361,6 +377,12 @@ def main():
     plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0.3, hspace=0.3)
     fig.suptitle(settings["parameters"]["fitness_function"].__name__ + ' minimization', fontsize=14)
     plt.show()
+
+    with open("myfile.txt", 'w+') as f:  
+        for key, value in settings.items():  
+            f.write('%s:%s\n' % (key, value))
+        f.write(output)
+        f.write('\n\n\n')
 
 
 if __name__ == "__main__":
