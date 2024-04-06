@@ -1,3 +1,4 @@
+import json
 import math
 import random
 from rastrigin import rastrigin
@@ -5,6 +6,8 @@ from sphere import sphere_function
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
+
+fitness_function = sphere_function
 
 settings = {
     "parameters": {
@@ -19,7 +22,6 @@ settings = {
         "mutation_element_probability": 0.5,
         "crossover_probability": 0.5,
         "distribution_index": 0.2,
-        "fitness_function": sphere_function
     },
     "actions": [
         {
@@ -40,7 +42,7 @@ class Agent:
     def __init__(self, x, energy=settings["parameters"]["startEnergy"]):
         self.x = x
         self.energy = energy
-        self.fitness = settings["parameters"]["fitness_function"](x)
+        self.fitness = fitness_function(x)
 
     @staticmethod
     def crossover(parent1, parent2):
@@ -140,12 +142,12 @@ class Agent:
 
         mutation_probability_x1 = mutation_probability_x2 = settings["parameters"]["mutation_probability"]
 
-        if settings["parameters"]["fitness_function"](newborn_x1) < f_avg:
+        if fitness_function(newborn_x1) < f_avg:
             mutation_probability_x1 /= 2
         else:
             mutation_probability_x1 *= 2
 
-        if settings["parameters"]["fitness_function"](newborn_x2) < f_avg:
+        if fitness_function(newborn_x2) < f_avg:
             mutation_probability_x2 /= 2
         else:
             mutation_probability_x2 *= 2
@@ -244,6 +246,17 @@ def generate_agents():
     return [Agent(
         [random.uniform(settings["parameters"]["minRast"], settings["parameters"]["maxRast"]) for _ in
          range(settings["parameters"]["dimensions"])]) for _ in range(settings["parameters"]['numberOfAgents'])]
+
+
+def save_to_file(output):
+    settings['function'] = fitness_function.__name__
+    settings['output'] = output
+    try:
+        with open("results.txt", 'a+') as file:
+            json.dump(settings, file, indent=4)
+            file.write('\n')
+    except Exception as e:
+        print("Error while saving results to file:", e)
 
 
 def main():
@@ -369,14 +382,10 @@ def main():
     ax[4, 1].grid()
 
     plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0.3, hspace=0.3)
-    fig.suptitle(settings["parameters"]["fitness_function"].__name__ + ' minimization', fontsize=14)
+    fig.suptitle(fitness_function.__name__ + ' minimization', fontsize=14)
     plt.show()
 
-    with open("myfile.txt", 'w+') as f:  
-        for key, value in settings.items():  
-            f.write('%s:%s\n' % (key, value))
-        f.write(output)
-        f.write('\n\n\n')
+    save_to_file(output)
 
 
 if __name__ == "__main__":
