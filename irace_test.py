@@ -10,7 +10,7 @@ import numpy as np
 import copy
 from irace import irace
 
-func = lambda x: np.sum(x * x - DIM * np.cos(2 * np.pi * x)) + DIM * np.size(x)
+func = rastrigin
 numberOfIterations = 200
 numberOfAgents = 50
 DIM = 10
@@ -18,9 +18,13 @@ LB = [-5.12]
 UB = [5.12]
 
 class Agent:
-    def __init__(self, x, settings):
+    def __init__(self, x, settings, energy=None):
         self.x = x
-        self.energy = settings["startEnergy"]
+        if energy is not None:
+            self.energy = energy
+        else:
+            self.energy = settings["start_energy"]
+
         self.fitness = func(x)
         self.settings = settings
 
@@ -69,13 +73,14 @@ class Agent:
 
         return offspring[0].x, offspring[1].x
 
-    def mutate(self, x):
+    @staticmethod
+    def mutate(x, settings):
         for i in range(len(x)):
             rand = random.random()
 
             if rand <= 1 / len(x):
                 y = x[i]
-                yl, yu = minRast, maxRast
+                yl, yu = LB[0], UB[0]
 
                 if yl == yu:
                     y = yl
@@ -83,27 +88,28 @@ class Agent:
                     delta1 = (y - yl) / (yu - yl)
                     delta2 = (yu - y) / (yu - yl)
                     rnd = random.random()
-                    mut_pow = 1.0 / (self.settings["distribution_index"] + 1.0)
+                    mut_pow = 1.0 / (settings["distribution_index"] + 1.0)
                     if rnd <= 0.5:
                         xy = 1.0 - delta1
                         val = 2.0 * rnd + (1.0 - 2.0 * rnd) * (
-                            pow(xy, self.settings["distribution_index"] + 1.0))
+                            pow(xy, settings["distribution_index"] + 1.0))
                         deltaq = pow(val, mut_pow) - 1.0
                     else:
                         xy = 1.0 - delta2
                         val = 2.0 * (1.0 - rnd) + 2.0 * (rnd - 0.5) * (
-                            pow(xy, self.settings["distribution_index"] + 1.0))
+                            pow(xy, settings["distribution_index"] + 1.0))
                         deltaq = 1.0 - pow(val, mut_pow)
 
                     y += deltaq * (yu - yl)
-                    if y < minRast:
-                        y = minRast
-                    if y > maxRast:
-                        y = maxRast
+                    if y < LB[0]:
+                        y = LB[0]
+                    if y > UB[0]:
+                        y = UB[0]
                 x[i] = y
         return x
 
-    def reproduce(self, parent1, parent2, loss_energy, f_avg):
+    @staticmethod
+    def reproduce(parent1, parent2, loss_energy, f_avg, settings):
         parent1_loss = math.ceil(parent1.energy * loss_energy)
         parent1.energy -= parent1_loss
 
@@ -111,33 +117,33 @@ class Agent:
         parent2.energy -= parent2_loss
 
         # Possible crossover
-        if random.random() < self.settings["crossover_probability"]:
+        if random.random() < settings["crossover_probability"]:
             newborns = Agent.crossover(parent1, parent2)
             newborn_x1, newborn_x2 = newborns[0], newborns[1]
         else:
             newborns = Agent.crossover(parent2, parent1)
             newborn_x1, newborn_x2 = newborns[0], newborns[1]
 
-        mutation_probability_x1 = mutation_probability_x2 = self.settings["mutation_probability"]
+        mutation_probability_x1 = mutation_probability_x2 = settings["mutation_probability"]
 
-        if fitness_function(newborn_x1) < f_avg:
+        if func(newborn_x1) < f_avg:
             mutation_probability_x1 /= 2
         else:
             mutation_probability_x1 *= 2
 
-        if fitness_function(newborn_x2) < f_avg:
+        if func(newborn_x2) < f_avg:
             mutation_probability_x2 /= 2
         else:
             mutation_probability_x2 *= 2
 
         random_number = random.random()
         if random_number < mutation_probability_x1:
-            newborn_x1 = Agent.mutate(newborn_x1)
+            newborn_x1 = Agent.mutate(newborn_x1, settings)
         if random_number < mutation_probability_x2:
-            newborn_x2 = Agent.mutate(newborn_x2)
+            newborn_x2 = Agent.mutate(newborn_x2, settings)
 
-        newborn1 = Agent(newborn_x1, parent1_loss + parent2_loss)
-        newborn2 = Agent(newborn_x2, parent1_loss + parent2_loss)
+        newborn1 = Agent(newborn_x1, settings, parent1_loss + parent2_loss)
+        newborn2 = Agent(newborn_x2, settings, parent1_loss + parent2_loss)
 
         return newborn1 if newborn1.fitness < newborn2.fitness else newborn2
 
@@ -183,8 +189,8 @@ class EMAS:
         return len(children), len(dead)
 
     def reproduce(self):
-        req_energy = self.settings["reproduceReqEnergy"]
-        loss_energy = self.settings["reproduceLossEnergy"]
+        req_energy = self.settings["reproduce_req_energy"]
+        loss_energy = self.settings["reproduce_loss_energy"]
 
         parents = []
         children = []
@@ -194,15 +200,14 @@ class EMAS:
                                      agent != parent1 and agent.energy > req_energy and agent not in parents]
                 if available_parents:
                     parent2 = random.choice(available_parents)
-                    children.append(Agent.reproduce(parent1, parent2, loss_energy,
-                                                    np.average([agent.fitness for agent in self.agents])))
+                    children.append(Agent.reproduce(parent1, parent2, loss_energy, np.average([agent.fitness for agent in self.agents]), self.settings))
                     parents.extend([parent1, parent2])
 
         return children
 
     def fight(self):
-        req_energy = self.settings["fightReqEnergy"]
-        loss_energy = self.settings["fightLossEnergy"]
+        req_energy = self.settings["fight_req_energy"]
+        loss_energy = self.settings["fight_loss_energy"]
 
         fighters = []
         for idx, agent1 in enumerate(self.agents):
@@ -220,90 +225,52 @@ class EMAS:
         return dead
 
 
-def generate_agents(bounds):
-    return [Agent(
-        [random.uniform(bounds[0], bounds[1]) for _ in
-         range(DIM)]) for _ in range(numberOfAgents)]
+def generate_agents(settings):
+    return [Agent([random.uniform(LB[0], UB[0]) for _ in range(DIM)], settings) for _ in range(numberOfAgents)]
 
 
-def emas(func, bounds, seed, maxfun, config):
-    print(config)
-    return 0.0
-
-    agents = generate_agents(bounds)
+def e(seed, config):
+    agents = generate_agents(config)
 
     emas = EMAS(agents, config)
 
-    total_number_of_born, total_number_of_dead = 0, 0
-    data = []
-
     for it in range(numberOfIterations):
-        # Number of agents, born agents and dead agents
         born_num, dead_num = emas.run_iteration()
-        total_number_of_born += born_num
-        total_number_of_dead += dead_num
-        agents_num = len(emas.agents)
 
-        if it % 10 == 0:
-            print(it)
-
-        # Min and Max standard deviations along each dimension for agents
-        vectors = np.array([agent.x for agent in emas.agents])
-        std = np.std(vectors, axis=0)
-        min_std = min(std)
-        max_std = max(std)
-
-        # Best agent based on its fitness
-        best_agent = min(emas.agents, key=lambda agent: agent.fitness)
-
-        # Add data
-        data.append((
-            agents_num,
-            born_num,
-            dead_num,
-            best_agent.fitness,
-            np.average([agent.fitness for agent in emas.agents]),
-            best_agent.energy,
-            np.average([agent.energy for agent in emas.agents]),
-            min_std,
-            max_std
-        ))
+    if len(emas.agents) == 0:
+        return math.inf
 
     best_agent = min(emas.agents, key=lambda agent: agent.fitness)
-
-    for i in range(len(best_agent.x)):
-        best_agent.x[i] = round(best_agent.x[i], 2)
 
     return best_agent.fitness
 
 def target_runner(experiment, scenario, lb=LB, ub=UB):
-    lw = lb * DIM
-    up = ub * DIM
-    ret = emas(
-        func,
-        bounds=list(zip(lw, up)),
-        seed=experiment['seed'],
-        maxfun=1e4,
-        **experiment['configuration']
+    s = experiment['seed']
+    c = experiment['configuration']
+
+    ret = e(
+        s,
+        c
     )
-    return dict(cost=ret.fun)
+
+    return dict(cost=ret)
 
 
 parameters_table = '''
-        startEnergy                  "" i     (0,100)
-        mutation_probability         "" r     (0,1)
-        mutation_element_probability "" r     (0,1)
-        crossover_probability        "" r     (0,1)
-        distribution_index           "" r     (0,1)
-        fightLossEnergy              "" r     (0,1)
-        reproduceLossEnergy          "" r     (0,1)
-        fightReqEnergy               "" i     (0,100)
-        reproduceReqEnergy           "" i     (0,100)
+start_energy                 "" i (0,100)
+mutation_probability         "" r (0,1)
+mutation_element_probability "" r (0,1)
+crossover_probability        "" r (0,1)
+distribution_index           "" r (0,1)
+fight_loss_energy            "" r (0,1)
+reproduce_loss_energy        "" r (0,1)
+fight_req_energy             "" i (0,100)
+reproduce_req_energy         "" i (0,100)
 '''
 
 default_values = '''
-    startEnergy mutation_probability mutation_element_probability crossover_probability distribution_index fightLossEnergy reproduceLossEnergy fightReqEnergy reproduceReqEnergy
-    100         0.5                  0.5                          0.5                   0.2                0.2             0.25                0              0 
+    start_energy mutation_probability mutation_element_probability crossover_probability distribution_index fight_loss_energy reproduce_loss_energy fight_req_energy reproduce_req_energy
+    100          0.5                  0.5                          0.5                   0.2                0.2               0.25                  0                0 
 '''
 
 # These are dummy "instances", we are tuning only on a single function.
