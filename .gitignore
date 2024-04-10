@@ -1,3 +1,5 @@
 .idea
 /__pycache__
 results.txt
+dual_annealing.py
+dual_annealing2.py
