@@ -11,7 +11,7 @@ import copy
 from irace import irace
 
 func = rastrigin
-numberOfIterations = 200
+numberOfIterations = 500
 numberOfAgents = 50
 DIM = 10
 LB = [-5.12]
