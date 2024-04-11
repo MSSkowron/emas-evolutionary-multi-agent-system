@@ -1,32 +1,52 @@
-import numpy as np
-from scipy.optimize import dual_annealing
-
-import json
 import math
 import random
-from rastrigin import rastrigin
-from sphere import sphere_function
 import numpy as np
 import copy
+from rastrigin import rastrigin
+from sphere import sphere_function
 from irace import irace
 
 func = rastrigin
-numberOfIterations = 500
-numberOfAgents = 50
-DIM = 10
 LB = [-5.12]
 UB = [5.12]
+
+DIM = 10
+
+numberOfIterations = 500
+numberOfAgents = 50
+
+parameters_table = '''
+start_energy                 "" i (0,100)
+mutation_probability         "" r (0,1)
+mutation_element_probability "" r (0,1)
+crossover_probability        "" r (0,1)
+distribution_index           "" r (0,1)
+fight_loss_energy            "" r (0,1)
+reproduce_loss_energy        "" r (0,1)
+fight_req_energy             "" i (0,100)
+reproduce_req_energy         "" i (0,100)
+'''
+
+default_values = '''
+    start_energy mutation_probability mutation_element_probability crossover_probability distribution_index fight_loss_energy reproduce_loss_energy fight_req_energy reproduce_req_energy
+    100          0.5                  0.5                          0.5                   0.2                0.2               0.25                  0                0 
+'''
+
 
 class Agent:
     def __init__(self, x, settings, energy=None):
         self.x = x
+        self.settings = settings
+
         if energy is not None:
             self.energy = energy
         else:
             self.energy = settings["start_energy"]
 
-        self.fitness = func(x)
-        self.settings = settings
+        self.fitness = self.calculate_fitness()
+
+    def calculate_fitness(self):
+        return func(self.x)
 
     @staticmethod
     def crossover(parent1, parent2):
@@ -116,7 +136,6 @@ class Agent:
         parent2_loss = math.ceil(parent2.energy * loss_energy)
         parent2.energy -= parent2_loss
 
-        # Possible crossover
         if random.random() < settings["crossover_probability"]:
             newborns = Agent.crossover(parent1, parent2)
             newborn_x1, newborn_x2 = newborns[0], newborns[1]
@@ -174,7 +193,8 @@ class Agent:
 
 
 class EMAS:
-    def __init__(self, agents, settings):
+    def __init__(self, seed, agents, settings):
+        self.seed = seed
         self.agents = agents
         self.settings = settings
 
@@ -184,9 +204,7 @@ class EMAS:
         children = self.reproduce()
         self.fight()
         self.agents.extend(children)
-        dead = self.clear()
-
-        return len(children), len(dead)
+        self.clear()
 
     def reproduce(self):
         req_energy = self.settings["reproduce_req_energy"]
@@ -200,7 +218,9 @@ class EMAS:
                                      agent != parent1 and agent.energy > req_energy and agent not in parents]
                 if available_parents:
                     parent2 = random.choice(available_parents)
-                    children.append(Agent.reproduce(parent1, parent2, loss_energy, np.average([agent.fitness for agent in self.agents]), self.settings))
+                    children.append(Agent.reproduce(parent1, parent2, loss_energy,
+                                                    np.average([agent.fitness for agent in self.agents]),
+                                                    self.settings))
                     parents.extend([parent1, parent2])
 
         return children
@@ -220,58 +240,32 @@ class EMAS:
                     fighters.extend([agent1, agent2])
 
     def clear(self):
-        dead = [agent for agent in self.agents if agent.is_dead()]
         self.agents = [agent for agent in self.agents if not agent.is_dead()]
-        return dead
 
 
 def generate_agents(settings):
     return [Agent([random.uniform(LB[0], UB[0]) for _ in range(DIM)], settings) for _ in range(numberOfAgents)]
 
 
-def e(seed, config):
+def optimize(seed, config):
     agents = generate_agents(config)
+    emas = EMAS(seed, agents, config)
 
-    emas = EMAS(agents, config)
+    for _ in range(numberOfIterations):
+        emas.run_iteration()
 
-    for it in range(numberOfIterations):
-        born_num, dead_num = emas.run_iteration()
+    best_agent = min(emas.agents, key=lambda agent: agent.fitness, default=None)
+    return math.inf if best_agent is None else best_agent.fitness
 
-    if len(emas.agents) == 0:
-        return math.inf
-
-    best_agent = min(emas.agents, key=lambda agent: agent.fitness)
-
-    return best_agent.fitness
 
 def target_runner(experiment, scenario, lb=LB, ub=UB):
     s = experiment['seed']
     c = experiment['configuration']
 
-    ret = e(
-        s,
-        c
-    )
+    ret = optimize(s, c)
 
     return dict(cost=ret)
 
-
-parameters_table = '''
-start_energy                 "" i (0,100)
-mutation_probability         "" r (0,1)
-mutation_element_probability "" r (0,1)
-crossover_probability        "" r (0,1)
-distribution_index           "" r (0,1)
-fight_loss_energy            "" r (0,1)
-reproduce_loss_energy        "" r (0,1)
-fight_req_energy             "" i (0,100)
-reproduce_req_energy         "" i (0,100)
-'''
-
-default_values = '''
-    start_energy mutation_probability mutation_element_probability crossover_probability distribution_index fight_loss_energy reproduce_loss_energy fight_req_energy reproduce_req_energy
-    100          0.5                  0.5                          0.5                   0.2                0.2               0.25                  0                0 
-'''
 
 # These are dummy "instances", we are tuning only on a single function.
 instances = np.arange(100)

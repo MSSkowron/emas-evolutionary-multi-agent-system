@@ -6,8 +6,6 @@ from sphere import sphere_function
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
-from irace import irace
-
 
 fitness_function = sphere_function
 
@@ -18,17 +16,17 @@ minRast = -5.12
 maxRast = 5.12
 
 settings = {
-        "startEnergy": 100,
-        "minFightEnergyLoss": 20,
-        "mutation_probability": 0.5,
-        "mutation_element_probability": 0.5,
-        "crossover_probability": 0.5,
-        "distribution_index": 0.2,
-        "fightLossEnergy":0.2,
-        "reproduceLossEnergy":0.25,
-        "fightReqEnergy":0,
-        "reproduceReqEnergy":0
-    }
+    "startEnergy": 100,
+    "minFightEnergyLoss": 20,
+    "mutation_probability": 0.5,
+    "mutation_element_probability": 0.5,
+    "crossover_probability": 0.5,
+    "distribution_index": 0.2,
+    "fightLossEnergy": 0.2,
+    "reproduceLossEnergy": 0.25,
+    "fightReqEnergy": 0,
+    "reproduceReqEnergy": 0
+}
 
 
 class Agent:
@@ -87,7 +85,7 @@ class Agent:
         for i in range(len(x)):
             rand = random.random()
 
-            if rand <= 1/len(x):
+            if rand <= 1 / len(x):
                 y = x[i]
                 yl, yu = minRast, maxRast
 
@@ -208,7 +206,8 @@ class EMAS:
                                      agent != parent1 and agent.energy > req_energy and agent not in parents]
                 if available_parents:
                     parent2 = random.choice(available_parents)
-                    children.append(Agent.reproduce(parent1, parent2, loss_energy, np.average([agent.fitness for agent in self.agents])))
+                    children.append(Agent.reproduce(parent1, parent2, loss_energy,
+                                                    np.average([agent.fitness for agent in self.agents])))
                     parents.extend([parent1, parent2])
 
         return children
@@ -234,9 +233,7 @@ class EMAS:
 
 
 def generate_agents():
-    return [Agent(
-        [random.uniform(minRast, maxRast) for _ in
-         range(dimensions)]) for _ in range(numberOfAgents)]
+    return [Agent([random.uniform(minRast, maxRast) for _ in range(dimensions)]) for _ in range(numberOfAgents)]
 
 
 def save_to_file(output):
@@ -264,10 +261,6 @@ def main():
         total_number_of_born += born_num
         total_number_of_dead += dead_num
         agents_num = len(emas.agents)
-        
-        
-        if it%10==0:
-            print(it)
 
         # Min and Max standard deviations along each dimension for agents
         vectors = np.array([agent.x for agent in emas.agents])
@@ -293,19 +286,19 @@ def main():
             max_std
         ))
 
-    # print("Number of agents left:", len(emas.agents))
-    # print()
-    # print("Total number of born agents:", total_number_of_born)
-    # print("Total number of dead agents:", total_number_of_dead)
-    # print()
+    print("Number of agents left:", len(emas.agents))
+    print()
+    print("Total number of born agents:", total_number_of_born)
+    print("Total number of dead agents:", total_number_of_dead)
+    print()
 
     best_agent = min(emas.agents, key=lambda agent: agent.fitness)
 
     for i in range(len(best_agent.x)):
         best_agent.x[i] = round(best_agent.x[i], 2)
 
-    # output = f"Minimum in {best_agent.x} equals = {best_agent.fitness:.2f} for agent with energy equals = {best_agent.energy:.2f}"
-    # print(output)
+    output = f"Minimum in {best_agent.x} equals = {best_agent.fitness:.2f} for agent with energy equals = {best_agent.energy:.2f}"
+    print(output)
 
     iteration_data = list(range(len(data)))
     number_of_agents = [item[0] for item in data]
@@ -383,8 +376,5 @@ def main():
     save_to_file(output)
 
 
-
-
 if __name__ == "__main__":
     main()
-
