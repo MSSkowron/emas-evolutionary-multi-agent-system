@@ -10,9 +10,9 @@ func = rastrigin
 LB = [-5.12]
 UB = [5.12]
 
-DIM = 10
+DIM = 50
 
-numberOfIterations = 500
+numberOfIterations = 200
 numberOfAgents = 50
 
 parameters_table = '''
