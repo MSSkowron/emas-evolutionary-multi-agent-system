@@ -9,8 +9,8 @@ import copy
 
 fitness_function = sphere_function
 
-numberOfIterations = 100
-numberOfAgents = 15
+numberOfIterations = 1000
+numberOfAgents = 60
 dimensions = 5
 minRast = -5.12
 maxRast = 5.12
@@ -18,13 +18,13 @@ maxRast = 5.12
 settings = {
     "startEnergy": 100,
     "mutation_probability": 0.5,
-    "mutation_element_probability": 0.5,
+    "mutation_element_probability": 0.2,
     "crossover_probability": 0.5,
     "distribution_index": 0.2,
     "fightLossEnergy": 0.05,
     "reproduceLossEnergy": 0.25,
     "fightReqEnergy": 0,
-    "reproduceReqEnergy": 200
+    "reproduceReqEnergy": 150
 }
 
 
@@ -79,6 +79,8 @@ class Agent:
 
         return offspring[0].x, offspring[1].x
 
+   
+    
     @staticmethod
     def mutate(x):
         for i in range(len(x)):
@@ -164,8 +166,10 @@ class Agent:
             agent_1.energy -= energy
             agent_2.energy += energy
 
-        agent_1.energy = round(agent_1.energy, 4)
-        agent_2.energy = round(agent_2.energy, 4)
+        agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**8), 10**8)
+        agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**8), 10**8)
+
+    
 
     # @staticmethod
     # def fight(agent_1, agent_2, loss_energy):
@@ -180,7 +184,8 @@ class Agent:
 
     def is_dead(self):
         return self.energy <= 0
-
+    
+    
 
 class EMAS:
     def __init__(self, agents):
@@ -277,7 +282,7 @@ def main():
 
         # Best agent based on its fitness
         best_agent = min(emas.agents, key=lambda agent: agent.fitness)
-
+        lowest_energy = min(emas.agents, key=lambda agent: agent.energy).energy
         # print(it, agents_num)
 
         # Add data
@@ -293,6 +298,14 @@ def main():
             max_std,
             energy_sum
         ))
+        if it%50 == 0:
+            print(f'\n\n')
+            for item in data:
+                print(item)
+            print(f"\n{it}")
+            print(f"Lowest energy: {lowest_energy}")
+            print(len(emas.agents),[agent.energy for agent in emas.agents])
+            input()
 
     print("Number of agents left:", len(emas.agents))
     print()
