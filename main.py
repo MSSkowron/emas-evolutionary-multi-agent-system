@@ -9,22 +9,22 @@ import copy
 
 fitness_function = sphere_function
 
-numberOfIterations = 1000
-numberOfAgents = 60
-dimensions = 5
+numberOfIterations = 30000
+numberOfAgents = 40
+dimensions = 100
 minRast = -5.12
 maxRast = 5.12
 
 settings = {
-    "startEnergy": 100,
-    "mutation_probability": 0.5,
+    "startEnergy": 1000,
+    "mutation_probability": 1,
     "mutation_element_probability": 0.2,
     "crossover_probability": 0.5,
     "distribution_index": 0.2,
-    "fightLossEnergy": 0.05,
-    "reproduceLossEnergy": 0.25,
+    "fightLossEnergy": 0.20,
+    "reproduceLossEnergy": 0.7,
     "fightReqEnergy": 0,
-    "reproduceReqEnergy": 150
+    "reproduceReqEnergy": 1600
 }
 
 
@@ -83,6 +83,13 @@ class Agent:
     
     @staticmethod
     def mutate(x):
+        # for i in range(len(x)):
+        #     rand = random.random()
+        #     if rand <= 1/len(x):
+        #         x[i] = (
+        #             minRast + (maxRast - minRast) * random.random()
+        #         )
+        # return x
         for i in range(len(x)):
             rand = random.random()
 
@@ -166,8 +173,8 @@ class Agent:
             agent_1.energy -= energy
             agent_2.energy += energy
 
-        agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**8), 10**8)
-        agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**8), 10**8)
+        agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**6), 10**6)
+        agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**6), 10**6)
 
     
 
@@ -270,7 +277,7 @@ def main():
         agents_num = len(emas.agents)
         energy_sum = np.sum([agent.energy for agent in emas.agents])
 
-        if it%10 == 0:
+        if it%50 == 0:
             print(it, agents_num)
 
 
@@ -298,14 +305,15 @@ def main():
             max_std,
             energy_sum
         ))
-        if it%50 == 0:
+        if it%100 == 0:
             print(f'\n\n')
-            for item in data:
-                print(item)
-            print(f"\n{it}")
-            print(f"Lowest energy: {lowest_energy}")
-            print(len(emas.agents),[agent.energy for agent in emas.agents])
-            input()
+            print(min_std)
+            # for item in data:
+            #     print(item)
+            # print(f"\n{it}")
+            # print(f"Lowest energy: {lowest_energy}")
+            # print(len(emas.agents),[agent.energy for agent in emas.agents])
+            # input()
 
     print("Number of agents left:", len(emas.agents))
     print()
