@@ -18,20 +18,18 @@ numberOfAgents = 40
 parameters_table = '''
 start_energy                 "" i (0,5000)
 mutation_probability         "" r (0,1)
-mutation_element_probability "" r (0,1)
 crossover_probability        "" r (0,1)
 distribution_index           "" r (0,1)
 fight_loss_energy            "" r (0,1)
 reproduce_loss_energy        "" r (0,1)
-fight_req_energy             "" i (0,10000)
 reproduce_req_energy         "" i (0,10000)
 death_threshold              "" i (0,10)
 crowding_factor              "" i (50,150)
 '''
 
 default_values = '''
-    start_energy mutation_probability mutation_element_probability crossover_probability distribution_index fight_loss_energy reproduce_loss_energy fight_req_energy reproduce_req_energy death_threshold crowding_factor
-    1000         1                    0.2                          0.5                   0.2                0.05              0.3                   0                1700                 8               100                    
+    start_energy mutation_probability  crossover_probability distribution_index fight_loss_energy reproduce_loss_energy reproduce_req_energy death_threshold crowding_factor
+    1000         1                     0.5                   0.2                0.05              0.3                   1700                 8               100                    
 '''
 
 
@@ -229,16 +227,14 @@ class EMAS:
         return children
 
     def fight(self):
-        req_energy = self.settings["fight_req_energy"]
         loss_energy = self.settings["fight_loss_energy"]
         death_threshold = self.settings["death_threshold"]
         crowding_factor = self.settings["crowding_factor"]
 
         fighters = []
         for idx, agent1 in enumerate(self.agents):
-            if agent1.energy > req_energy and agent1 not in fighters:
-                available_fighters = [agent for agent in self.agents if
-                                      agent != agent1 and agent.energy > req_energy and agent not in fighters]
+            if agent1 not in fighters:
+                available_fighters = [agent for agent in self.agents if agent != agent1 and agent not in fighters]
                 if available_fighters:
                     agent2 = random.choice(available_fighters)
                     Agent.fight(agent1, agent2, loss_energy, death_threshold, crowding_factor)

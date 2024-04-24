@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
-fitness_function = sphere_function
+fitness_function = rastrigin
 
 numberOfIterations = 30000
 numberOfAgents = 40
