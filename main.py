@@ -25,7 +25,8 @@ settings = {
     "reproduceLossEnergy": 0.3,
     "fightReqEnergy": 0,
     "reproduceReqEnergy": 1700,
-    "deathThreshold":8
+    "deathThreshold":8,
+    "crowdingFactor":100
 }
 
 
@@ -165,18 +166,28 @@ class Agent:
 
     @staticmethod
     def fight(agent_1, agent_2, loss_energy):
+        d = np.sum(np.abs(np.array(agent_1.x) - np.array(agent_2.x)))
         if agent_1.fitness < agent_2.fitness:
             energy = agent_2.energy * loss_energy
             agent_1.energy += energy
             agent_2.energy -= energy
+            if d<settings["crowdingFactor"]:
+                energy =  agent_2.energy * (1-d**2/settings["crowdingFactor"]**2)
+                agent_1.energy += energy
+                agent_2.energy -= energy
         else:
             energy = agent_1.energy * loss_energy
             agent_1.energy -= energy
             agent_2.energy += energy
+            if d<settings["crowdingFactor"]:
+                energy =  agent_1.energy * (1-d**2/settings["crowdingFactor"]**2)
+                agent_1.energy -= energy
+                agent_2.energy += energy
 
-        agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**settings["deathTreshhold"]), 10**settings["deathTreshhold"])
-        agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**settings["deathTreshhold"]), 10**settings["deathTreshhold"])
+        agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**settings["deathThreshold"]), 10**settings["deathThreshold"])
+        agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**settings["deathThreshold"]), 10**settings["deathThreshold"])
 
+        
     
 
     # @staticmethod
