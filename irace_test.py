@@ -12,25 +12,24 @@ UB = [5.12]
 
 DIM = 100
 
-numberOfIterations = 500
+numberOfIterations = 100
 numberOfAgents = 40
 
 parameters_table = '''
 start_energy                 "" i (0,5000)
 mutation_probability         "" r (0,1)
-mutation_element_probability "" r (0,1)
 crossover_probability        "" r (0,1)
 distribution_index           "" r (0,1)
 fight_loss_energy            "" r (0,1)
 reproduce_loss_energy        "" r (0,1)
-fight_req_energy             "" i (0,10000)
 reproduce_req_energy         "" i (0,10000)
 death_threshold              "" i (0,10)
+crowding_factor              "" i (50,150)
 '''
 
 default_values = '''
-    start_energy mutation_probability mutation_element_probability crossover_probability distribution_index fight_loss_energy reproduce_loss_energy fight_req_energy reproduce_req_energy death_threshold
-    1000         1                    0.2                          0.5                   0.2                0.05              0.3                   0                1700                    8
+    start_energy mutation_probability  crossover_probability distribution_index fight_loss_energy reproduce_loss_energy reproduce_req_energy death_threshold crowding_factor
+    1000         1                     0.5                   0.2                0.05              0.3                   1700                 8               100                    
 '''
 
 
@@ -168,15 +167,24 @@ class Agent:
         return newborn1 if newborn1.fitness < newborn2.fitness else newborn2
 
     @staticmethod
-    def fight(agent_1, agent_2, loss_energy, death_threshold):
+    def fight(agent_1, agent_2, loss_energy, death_threshold, crowding_factor):
+        d = np.sum(np.abs(np.array(agent_1.x) - np.array(agent_2.x)))
         if agent_1.fitness < agent_2.fitness:
             energy = agent_2.energy * loss_energy
             agent_1.energy += energy
             agent_2.energy -= energy
+            if d < crowding_factor:
+                energy = agent_2.energy * (1-d**2/crowding_factor**2)
+                agent_1.energy += energy
+                agent_2.energy -= energy
         else:
             energy = agent_1.energy * loss_energy
             agent_1.energy -= energy
             agent_2.energy += energy
+            if d < crowding_factor:
+                energy = agent_1.energy * (1-d**2/crowding_factor**2)
+                agent_1.energy -= energy
+                agent_2.energy += energy
 
         agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**death_threshold), 10**death_threshold)
         agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**death_threshold), 10**death_threshold)
@@ -219,18 +227,17 @@ class EMAS:
         return children
 
     def fight(self):
-        req_energy = self.settings["fight_req_energy"]
         loss_energy = self.settings["fight_loss_energy"]
         death_threshold = self.settings["death_threshold"]
+        crowding_factor = self.settings["crowding_factor"]
 
         fighters = []
         for idx, agent1 in enumerate(self.agents):
-            if agent1.energy > req_energy and agent1 not in fighters:
-                available_fighters = [agent for agent in self.agents if
-                                      agent != agent1 and agent.energy > req_energy and agent not in fighters]
+            if agent1 not in fighters:
+                available_fighters = [agent for agent in self.agents if agent != agent1 and agent not in fighters]
                 if available_fighters:
                     agent2 = random.choice(available_fighters)
-                    Agent.fight(agent1, agent2, loss_energy, death_threshold)
+                    Agent.fight(agent1, agent2, loss_energy, death_threshold, crowding_factor)
                     fighters.extend([agent1, agent2])
 
     def clear(self):
@@ -278,17 +285,3 @@ tuner.set_initial_from_str(default_values)
 best_confs = tuner.run()
 # Pandas DataFrame
 print(best_confs)
-
-# ret = optimize(1, {
-#     "start_energy": 1000,
-#     "mutation_probability": 1,
-#     "mutation_element_probability": 0.2,
-#     "crossover_probability": 0.5,
-#     "distribution_index": 0.2,
-#     "fight_loss_energy": 0.05,
-#     "reproduce_loss_energy": 0.3,
-#     "fight_req_energy": 0,
-#     "reproduce_req_energy": 1700,
-#     "death_threshold": 8
-# })
-# print(ret)
