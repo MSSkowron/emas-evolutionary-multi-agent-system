@@ -13,7 +13,7 @@ UB = [5.12]
 DIM = 50
 
 numberOfIterations = 1000
-numberOfAgents = 50
+numberOfAgents = 40
 
 parameters_table = '''
 start_energy                 "" i (0,100)
