@@ -21,11 +21,11 @@ settings = {
     "mutation_element_probability": 0.2,
     "crossover_probability": 0.5,
     "distribution_index": 0.2,
-    "fightLossEnergy": 0.20,
-    "reproduceLossEnergy": 0.7,
+    "fightLossEnergy": 0.05,
+    "reproduceLossEnergy": 0.3,
     "fightReqEnergy": 0,
-    "reproduceReqEnergy": 1600,
-    "deathTreshhold": 7
+    "reproduceReqEnergy": 1700,
+    "deathThreshold":8
 }
 
 
