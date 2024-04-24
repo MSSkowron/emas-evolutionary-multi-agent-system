@@ -9,23 +9,22 @@ import copy
 
 fitness_function = sphere_function
 
-numberOfIterations = 200
-numberOfAgents = 50
-dimensions = 200
+numberOfIterations = 30000
+numberOfAgents = 40
+dimensions = 100
 minRast = -5.12
 maxRast = 5.12
 
 settings = {
-    "startEnergy": 100,
-    "minFightEnergyLoss": 20,
-    "mutation_probability": 0.5,
-    "mutation_element_probability": 0.5,
+    "startEnergy": 1000,
+    "mutation_probability": 1,
+    "mutation_element_probability": 0.2,
     "crossover_probability": 0.5,
     "distribution_index": 0.2,
-    "fightLossEnergy": 0.2,
-    "reproduceLossEnergy": 0.25,
+    "fightLossEnergy": 0.20,
+    "reproduceLossEnergy": 0.7,
     "fightReqEnergy": 0,
-    "reproduceReqEnergy": 0
+    "reproduceReqEnergy": 1600
 }
 
 
@@ -80,8 +79,17 @@ class Agent:
 
         return offspring[0].x, offspring[1].x
 
+   
+    
     @staticmethod
     def mutate(x):
+        # for i in range(len(x)):
+        #     rand = random.random()
+        #     if rand <= 1/len(x):
+        #         x[i] = (
+        #             minRast + (maxRast - minRast) * random.random()
+        #         )
+        # return x
         for i in range(len(x)):
             rand = random.random()
 
@@ -154,31 +162,37 @@ class Agent:
 
         return newborn1 if newborn1.fitness < newborn2.fitness else newborn2
 
-    # @staticmethod
-    # def fight(agent_1, agent_2, loss_energy):
-    #     if agent_1.fitness < agent_2.fitness:
-    #         energy = math.ceil(max(agent_2.energy * loss_energy, settings["minFightEnergyLoss"]))
-    #         agent_1.energy += energy
-    #         agent_2.energy -= energy
-    #     else:
-    #         energy = math.ceil(max(agent_1.energy * loss_energy, settings["minFightEnergyLoss"]))
-    #         agent_1.energy -= energy
-    #         agent_2.energy += energy
-
     @staticmethod
     def fight(agent_1, agent_2, loss_energy):
         if agent_1.fitness < agent_2.fitness:
-            energy = agent_2.energy
+            energy = agent_2.energy * loss_energy
             agent_1.energy += energy
             agent_2.energy -= energy
         else:
-            energy = agent_1.energy
+            energy = agent_1.energy * loss_energy
             agent_1.energy -= energy
             agent_2.energy += energy
 
+        agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**6), 10**6)
+        agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**6), 10**6)
+
+    
+
+    # @staticmethod
+    # def fight(agent_1, agent_2, loss_energy):
+    #     if agent_1.fitness < agent_2.fitness:
+    #         energy = agent_2.energy
+    #         agent_1.energy += energy
+    #         agent_2.energy -= energy
+    #     else:
+    #         energy = agent_1.energy
+    #         agent_1.energy -= energy
+    #         agent_2.energy += energy
+
     def is_dead(self):
         return self.energy <= 0
-
+    
+    
 
 class EMAS:
     def __init__(self, agents):
@@ -261,6 +275,11 @@ def main():
         total_number_of_born += born_num
         total_number_of_dead += dead_num
         agents_num = len(emas.agents)
+        energy_sum = np.sum([agent.energy for agent in emas.agents])
+
+        if it%50 == 0:
+            print(it, agents_num)
+
 
         # Min and Max standard deviations along each dimension for agents
         vectors = np.array([agent.x for agent in emas.agents])
@@ -270,7 +289,7 @@ def main():
 
         # Best agent based on its fitness
         best_agent = min(emas.agents, key=lambda agent: agent.fitness)
-
+        lowest_energy = min(emas.agents, key=lambda agent: agent.energy).energy
         # print(it, agents_num)
 
         # Add data
@@ -283,8 +302,18 @@ def main():
             best_agent.energy,
             np.average([agent.energy for agent in emas.agents]),
             min_std,
-            max_std
+            max_std,
+            energy_sum
         ))
+        if it%100 == 0:
+            print(f'\n\n')
+            print(min_std)
+            # for item in data:
+            #     print(item)
+            # print(f"\n{it}")
+            # print(f"Lowest energy: {lowest_energy}")
+            # print(len(emas.agents),[agent.energy for agent in emas.agents])
+            # input()
 
     print("Number of agents left:", len(emas.agents))
     print()
@@ -310,6 +339,7 @@ def main():
     avg_energy = [item[6] for item in data]
     min_std = [item[7] for item in data]
     max_std = [item[8] for item in data]
+    sum_energy = [item[9] for item in data]
 
     fig, ax = plt.subplots(5, 2)
     fig.set_figheight(30)
@@ -320,6 +350,12 @@ def main():
     ax[0, 0].set_xlabel("Iteration")
     ax[0, 0].set_ylabel("Number of agents")
     ax[0, 0].grid()
+
+    ax[0, 1].plot(iteration_data, sum_energy, marker='o', linestyle='-')
+    ax[0, 1].set_title("Energy sum")
+    ax[0, 1].set_xlabel("Iteration")
+    ax[0, 1].set_ylabel("Energy sum")
+    ax[0, 1].grid()
 
     ax[1, 0].plot(iteration_data, number_of_born_agents, marker='o', linestyle='-')
     ax[1, 0].set_title("Number of born agents after each iteration")
