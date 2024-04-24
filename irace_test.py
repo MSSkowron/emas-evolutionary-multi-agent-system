@@ -12,7 +12,7 @@ UB = [5.12]
 
 DIM = 50
 
-numberOfIterations = 200
+numberOfIterations = 1000
 numberOfAgents = 50
 
 parameters_table = '''
