@@ -12,7 +12,7 @@ UB = [5.12]
 
 DIM = 50
 
-numberOfIterations = 1000
+numberOfIterations = 100
 numberOfAgents = 40
 
 parameters_table = '''
@@ -277,7 +277,7 @@ instances = np.arange(100)
 # See https://mlopez-ibanez.github.io/irace/reference/defaultScenario.html
 scenario = dict(
     instances=instances,
-    maxExperiments=300,
+    maxExperiments=1000,
     debugLevel=3,
     digits=5,
     parallel=1,
