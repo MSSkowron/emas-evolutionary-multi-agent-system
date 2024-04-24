@@ -7,26 +7,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
-fitness_function = sphere_function
+fitness_function = rastrigin
 
-numberOfIterations = 30000
+numberOfIterations = 100
 numberOfAgents = 40
 dimensions = 100
 minRast = -5.12
 maxRast = 5.12
 
 settings = {
-    "startEnergy": 1000,
-    "mutation_probability": 1,
-    "mutation_element_probability": 0.2,
-    "crossover_probability": 0.5,
-    "distribution_index": 0.2,
-    "fightLossEnergy": 0.05,
-    "reproduceLossEnergy": 0.3,
-    "fightReqEnergy": 0,
-    "reproduceReqEnergy": 1700,
+    "startEnergy": 1204,
+    "mutation_probability": 0.88,
+    "crossover_probability": 0.43,
+    "distribution_index": 0.08,
+    "fightLossEnergy": 0.63,
+    "reproduceLossEnergy": 0.86,
+    "reproduceReqEnergy": 9,
     "deathThreshold":8,
-    "crowdingFactor":100
+    "crowdingFactor":74
 }
 
 
@@ -85,13 +83,6 @@ class Agent:
     
     @staticmethod
     def mutate(x):
-        # for i in range(len(x)):
-        #     rand = random.random()
-        #     if rand <= 1/len(x):
-        #         x[i] = (
-        #             minRast + (maxRast - minRast) * random.random()
-        #         )
-        # return x
         for i in range(len(x)):
             rand = random.random()
 
@@ -187,19 +178,6 @@ class Agent:
         agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**settings["deathThreshold"]), 10**settings["deathThreshold"])
         agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**settings["deathThreshold"]), 10**settings["deathThreshold"])
 
-        
-    
-
-    # @staticmethod
-    # def fight(agent_1, agent_2, loss_energy):
-    #     if agent_1.fitness < agent_2.fitness:
-    #         energy = agent_2.energy
-    #         agent_1.energy += energy
-    #         agent_2.energy -= energy
-    #     else:
-    #         energy = agent_1.energy
-    #         agent_1.energy -= energy
-    #         agent_2.energy += energy
 
     def is_dead(self):
         return self.energy <= 0
@@ -239,14 +217,13 @@ class EMAS:
         return children
 
     def fight(self):
-        req_energy = settings["fightReqEnergy"]
         loss_energy = settings["fightLossEnergy"]
 
         fighters = []
         for idx, agent1 in enumerate(self.agents):
-            if agent1.energy > req_energy and agent1 not in fighters:
+            if agent1 not in fighters:
                 available_fighters = [agent for agent in self.agents if
-                                      agent != agent1 and agent.energy > req_energy and agent not in fighters]
+                                      agent != agent1 and agent not in fighters]
                 if available_fighters:
                     agent2 = random.choice(available_fighters)
                     Agent.fight(agent1, agent2, loss_energy)
