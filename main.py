@@ -24,7 +24,8 @@ settings = {
     "fightLossEnergy": 0.20,
     "reproduceLossEnergy": 0.7,
     "fightReqEnergy": 0,
-    "reproduceReqEnergy": 1600
+    "reproduceReqEnergy": 1600,
+    "deathTreshhold": 7
 }
 
 
@@ -173,8 +174,8 @@ class Agent:
             agent_1.energy -= energy
             agent_2.energy += energy
 
-        agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**6), 10**6)
-        agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**6), 10**6)
+        agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**settings["deathTreshhold"]), 10**settings["deathTreshhold"])
+        agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**settings["deathTreshhold"]), 10**settings["deathTreshhold"])
 
     
 

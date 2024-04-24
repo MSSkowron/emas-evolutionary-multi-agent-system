@@ -25,11 +25,12 @@ fight_loss_energy            "" r (0,1)
 reproduce_loss_energy        "" r (0,1)
 fight_req_energy             "" i (0,100)
 reproduce_req_energy         "" i (0,100)
+death_treshold               "" i (0,10)
 '''
 
 default_values = '''
-    start_energy mutation_probability mutation_element_probability crossover_probability distribution_index fight_loss_energy reproduce_loss_energy fight_req_energy reproduce_req_energy
-    100          0.5                  0.5                          0.5                   0.2                0.2               0.25                  0                0 
+    start_energy mutation_probability mutation_element_probability crossover_probability distribution_index fight_loss_energy reproduce_loss_energy fight_req_energy reproduce_req_energy death_treshold
+    100          0.5                  0.5                          0.5                   0.2                0.2               0.25                  0                0                    7
 '''
 
 
@@ -178,15 +179,18 @@ class Agent:
     #         agent_2.energy += energy
 
     @staticmethod
-    def fight(agent_1, agent_2, loss_energy):
+    def fight(agent_1, agent_2, loss_energy, death_treshold):
         if agent_1.fitness < agent_2.fitness:
-            energy = agent_2.energy
+            energy = agent_2.energy * loss_energy
             agent_1.energy += energy
             agent_2.energy -= energy
         else:
-            energy = agent_1.energy
+            energy = agent_1.energy * loss_energy
             agent_1.energy -= energy
             agent_2.energy += energy
+        
+        agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**death_treshold), 10**death_treshold)
+        agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**death_treshold), 10**death_treshold)
 
     def is_dead(self):
         return self.energy <= 0
@@ -219,8 +223,7 @@ class EMAS:
                 if available_parents:
                     parent2 = random.choice(available_parents)
                     children.append(Agent.reproduce(parent1, parent2, loss_energy,
-                                                    np.average([agent.fitness for agent in self.agents]),
-                                                    self.settings))
+                                                    np.average([agent.fitness for agent in self.agents]), self.settings))
                     parents.extend([parent1, parent2])
 
         return children
@@ -228,6 +231,7 @@ class EMAS:
     def fight(self):
         req_energy = self.settings["fight_req_energy"]
         loss_energy = self.settings["fight_loss_energy"]
+        death_treshold = self.settings["death_treshold"]
 
         fighters = []
         for idx, agent1 in enumerate(self.agents):
@@ -236,7 +240,7 @@ class EMAS:
                                       agent != agent1 and agent.energy > req_energy and agent not in fighters]
                 if available_fighters:
                     agent2 = random.choice(available_fighters)
-                    Agent.fight(agent1, agent2, loss_energy)
+                    Agent.fight(agent1, agent2, loss_energy, death_treshold)
                     fighters.extend([agent1, agent2])
 
     def clear(self):
