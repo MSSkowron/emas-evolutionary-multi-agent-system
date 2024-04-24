@@ -10,27 +10,27 @@ func = rastrigin
 LB = [-5.12]
 UB = [5.12]
 
-DIM = 50
+DIM = 100
 
-numberOfIterations = 100
+numberOfIterations = 500
 numberOfAgents = 40
 
 parameters_table = '''
-start_energy                 "" i (0,100)
+start_energy                 "" i (0,5000)
 mutation_probability         "" r (0,1)
 mutation_element_probability "" r (0,1)
 crossover_probability        "" r (0,1)
 distribution_index           "" r (0,1)
 fight_loss_energy            "" r (0,1)
 reproduce_loss_energy        "" r (0,1)
-fight_req_energy             "" i (0,100)
-reproduce_req_energy         "" i (0,100)
-death_treshold               "" i (0,10)
+fight_req_energy             "" i (0,10000)
+reproduce_req_energy         "" i (0,10000)
+death_threshold              "" i (0,10)
 '''
 
 default_values = '''
-    start_energy mutation_probability mutation_element_probability crossover_probability distribution_index fight_loss_energy reproduce_loss_energy fight_req_energy reproduce_req_energy death_treshold
-    100          0.5                  0.5                          0.5                   0.2                0.2               0.25                  0                0                    7
+    start_energy mutation_probability mutation_element_probability crossover_probability distribution_index fight_loss_energy reproduce_loss_energy fight_req_energy reproduce_req_energy death_threshold
+    1000         1                    0.2                          0.5                   0.2                0.05              0.3                   0                1700                    8
 '''
 
 
@@ -167,19 +167,8 @@ class Agent:
 
         return newborn1 if newborn1.fitness < newborn2.fitness else newborn2
 
-    # @staticmethod
-    # def fight(agent_1, agent_2, loss_energy):
-    #     if agent_1.fitness < agent_2.fitness:
-    #         energy = math.ceil(max(agent_2.energy * loss_energy, settings["minFightEnergyLoss"]))
-    #         agent_1.energy += energy
-    #         agent_2.energy -= energy
-    #     else:
-    #         energy = math.ceil(max(agent_1.energy * loss_energy, settings["minFightEnergyLoss"]))
-    #         agent_1.energy -= energy
-    #         agent_2.energy += energy
-
     @staticmethod
-    def fight(agent_1, agent_2, loss_energy, death_treshold):
+    def fight(agent_1, agent_2, loss_energy, death_threshold):
         if agent_1.fitness < agent_2.fitness:
             energy = agent_2.energy * loss_energy
             agent_1.energy += energy
@@ -188,9 +177,9 @@ class Agent:
             energy = agent_1.energy * loss_energy
             agent_1.energy -= energy
             agent_2.energy += energy
-        
-        agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**death_treshold), 10**death_treshold)
-        agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**death_treshold), 10**death_treshold)
+
+        agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**death_threshold), 10**death_threshold)
+        agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**death_threshold), 10**death_threshold)
 
     def is_dead(self):
         return self.energy <= 0
@@ -223,7 +212,8 @@ class EMAS:
                 if available_parents:
                     parent2 = random.choice(available_parents)
                     children.append(Agent.reproduce(parent1, parent2, loss_energy,
-                                                    np.average([agent.fitness for agent in self.agents]), self.settings))
+                                                    np.average([agent.fitness for agent in self.agents]),
+                                                    self.settings))
                     parents.extend([parent1, parent2])
 
         return children
@@ -231,7 +221,7 @@ class EMAS:
     def fight(self):
         req_energy = self.settings["fight_req_energy"]
         loss_energy = self.settings["fight_loss_energy"]
-        death_treshold = self.settings["death_treshold"]
+        death_threshold = self.settings["death_threshold"]
 
         fighters = []
         for idx, agent1 in enumerate(self.agents):
@@ -240,7 +230,7 @@ class EMAS:
                                       agent != agent1 and agent.energy > req_energy and agent not in fighters]
                 if available_fighters:
                     agent2 = random.choice(available_fighters)
-                    Agent.fight(agent1, agent2, loss_energy, death_treshold)
+                    Agent.fight(agent1, agent2, loss_energy, death_threshold)
                     fighters.extend([agent1, agent2])
 
     def clear(self):
@@ -288,3 +278,17 @@ tuner.set_initial_from_str(default_values)
 best_confs = tuner.run()
 # Pandas DataFrame
 print(best_confs)
+
+# ret = optimize(1, {
+#     "start_energy": 1000,
+#     "mutation_probability": 1,
+#     "mutation_element_probability": 0.2,
+#     "crossover_probability": 0.5,
+#     "distribution_index": 0.2,
+#     "fight_loss_energy": 0.05,
+#     "reproduce_loss_energy": 0.3,
+#     "fight_req_energy": 0,
+#     "reproduce_req_energy": 1700,
+#     "death_threshold": 8
+# })
+# print(ret)
