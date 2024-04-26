@@ -2,13 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
-minRast = -5.12
-maxRast = 5.12
+minSchwef = -500
+maxSchwef = 500
 
-def rastrigin(x, a=10):
+def schwefel(x):
     dim = len(x)
-    return a * dim + np.sum([(xi ** 2 - a * np.cos(2 * np.pi * xi)) for xi in x])
-
+    return 418.9829 * dim - np.sum([(x_i * np.sin(np.sqrt(np.abs(x_i)))) for x_i in x])
 
 def generate_points(min_val, max_val, num_points):
     return np.linspace(min_val, max_val, num_points)
@@ -16,12 +15,12 @@ def generate_points(min_val, max_val, num_points):
 
 if __name__ == "__main__":
     dimension, amount_of_points = 2, 100
-    X = generate_points(-5.12, 5.12, amount_of_points)
-    Y = generate_points(-5.12, 5.12, amount_of_points)
+    X = generate_points(minSchwef, maxSchwef, amount_of_points)
+    Y = generate_points(minSchwef, maxSchwef, amount_of_points)
 
     A = [[X[x] for _ in range(amount_of_points)] for x in range(amount_of_points)]
     B = [[Y[y] for y in range(amount_of_points)] for _ in range(amount_of_points)]
-    C = [[rastrigin([X[x], Y[y]]) for y in range(amount_of_points)] for x in range(amount_of_points)]
+    C = [[schwefel([X[x], Y[y]]) for y in range(amount_of_points)] for x in range(amount_of_points)]
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')

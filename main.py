@@ -1,30 +1,32 @@
 import json
 import math
 import random
-from rastrigin import rastrigin
+from rastrigin import rastrigin, minRast, maxRast
+from schaffer import schaffer, minSchaff, maxSchaff
+from schwefel import schwefel, minSchwef, maxSchwef
 from sphere import sphere_function
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
-fitness_function = rastrigin
+fitness_function = schwefel
 
-numberOfIterations = 100
+numberOfIterations = 30000
 numberOfAgents = 40
 dimensions = 100
-minRast = -5.12
-maxRast = 5.12
+minVal = minSchwef
+maxVal = maxSchwef
 
 settings = {
-    "startEnergy": 1204,
-    "mutation_probability": 0.88,
-    "crossover_probability": 0.43,
-    "distribution_index": 0.08,
-    "fightLossEnergy": 0.63,
-    "reproduceLossEnergy": 0.86,
-    "reproduceReqEnergy": 9,
+    "startEnergy": 1000,
+    "mutation_probability": 1,
+    "crossover_probability": 0.5,
+    "distribution_index": 0.2,
+    "fightLossEnergy": 0.05,
+    "reproduceLossEnergy": 0.3,
+    "reproduceReqEnergy": 1700,
     "deathThreshold":8,
-    "crowdingFactor":74
+    "crowdingFactor":1500
 }
 
 
@@ -88,7 +90,7 @@ class Agent:
 
             if rand <= 1 / len(x):
                 y = x[i]
-                yl, yu = minRast, maxRast
+                yl, yu = minVal, maxVal
 
                 if yl == yu:
                     y = yl
@@ -109,10 +111,10 @@ class Agent:
                         deltaq = 1.0 - pow(val, mut_pow)
 
                     y += deltaq * (yu - yl)
-                    if y < minRast:
-                        y = minRast
-                    if y > maxRast:
-                        y = maxRast
+                    if y < minVal:
+                        y = minVal
+                    if y > maxVal:
+                        y = maxVal
                 x[i] = y
         return x
 
@@ -236,7 +238,7 @@ class EMAS:
 
 
 def generate_agents():
-    return [Agent([random.uniform(minRast, maxRast) for _ in range(dimensions)]) for _ in range(numberOfAgents)]
+    return [Agent([random.uniform(minVal, maxVal) for _ in range(dimensions)]) for _ in range(numberOfAgents)]
 
 
 def save_to_file(output):
