@@ -4,18 +4,19 @@ import random
 from rastrigin import rastrigin, minRast, maxRast
 from schaffer import schaffer, minSchaff, maxSchaff
 from schwefel import schwefel, minSchwef, maxSchwef
-from sphere import sphere_function
+from sphere import sphere, minSphere, maxSphere
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
+import time
 
-fitness_function = schwefel
+fitness_function = sphere
 
 numberOfIterations = 30000
 numberOfAgents = 40
 dimensions = 100
-minVal = minSchwef
-maxVal = maxSchwef
+minVal = minSphere
+maxVal = maxSphere
 
 settings = {
     "startEnergy": 1000,
@@ -26,7 +27,7 @@ settings = {
     "reproduceLossEnergy": 0.3,
     "reproduceReqEnergy": 1700,
     "deathThreshold":8,
-    "crowdingFactor":1500
+    "crowdingFactor":1000
 }
 
 
@@ -241,11 +242,15 @@ def generate_agents():
     return [Agent([random.uniform(minVal, maxVal) for _ in range(dimensions)]) for _ in range(numberOfAgents)]
 
 
-def save_to_file(output):
+def save_to_file(output, start_time, name):
     settings['function'] = fitness_function.__name__
+    settings['iterations'] = numberOfIterations
+    settings['agents'] = numberOfAgents
+    settings['dimensions'] = dimensions
     settings['output'] = output
+    settings['time'] = time.time() - start_time
     try:
-        with open("results.txt", 'a+') as file:
+        with open(name+".txt", 'a+') as file:
             json.dump(settings, file, indent=4)
             file.write('\n')
     except Exception as e:
@@ -253,6 +258,7 @@ def save_to_file(output):
 
 
 def main():
+    start_time=time.time()
     agents = generate_agents()
 
     emas = EMAS(agents)
@@ -298,7 +304,7 @@ def main():
         ))
         if it%100 == 0:
             print(f'\n\n')
-            print(min_std)
+            print(best_agent.fitness)
             # for item in data:
             #     print(item)
             # print(f"\n{it}")
@@ -398,10 +404,13 @@ def main():
 
     plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0.3, hspace=0.3)
     fig.suptitle(fitness_function.__name__ + ' minimization', fontsize=14)
-    plt.show()
-
-    save_to_file(output)
+    # plt.show()
+    name = "results/"+fitness_function.__name__+"_"+str(time.time())
+    plt.savefig(name+".png")
+    save_to_file(output, start_time, name)
 
 
 if __name__ == "__main__":
+    
     main()
+    
