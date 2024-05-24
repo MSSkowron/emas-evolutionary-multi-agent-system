@@ -19,7 +19,7 @@ from rastrigin import LB, UB
 
 DIM = 100
 
-numberOfIterations = 100
+numberOfIterations = 1000
 numberOfAgents = 40
 
 parameters_table = '''
