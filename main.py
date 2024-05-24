@@ -88,8 +88,8 @@ class Agent:
 
         return offspring[0].x, offspring[1].x
 
-   
-    
+
+
     @staticmethod
     def mutate(x):
         for i in range(len(x)):
@@ -143,12 +143,12 @@ class Agent:
 
         mutation_probability_x1 = mutation_probability_x2 = settings["mutation_probability"]
 
-        if func(newborn_x1) < f_avg:
+        if newborn_x1.fitness < f_avg:
             mutation_probability_x1 /= 2
         else:
             mutation_probability_x1 *= 2
 
-        if func(newborn_x2) < f_avg:
+        if newborn_x2.fitness < f_avg:
             mutation_probability_x2 /= 2
         else:
             mutation_probability_x2 *= 2
@@ -190,8 +190,8 @@ class Agent:
 
     def is_dead(self):
         return self.energy <= 0
-    
-    
+
+
 
 class EMAS:
     def __init__(self, agents):
@@ -417,6 +417,6 @@ def main():
 
 
 if __name__ == "__main__":
-    
+
     main()
-    
+
