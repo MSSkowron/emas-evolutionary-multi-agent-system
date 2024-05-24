@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
-minRast = -5.12
-maxRast = 5.12
+LB = -5.12
+UB = 5.12
 
-def rastrigin(x, a=10):
+def func(x, a=10):
     dim = len(x)
     return a * dim + np.sum([(xi ** 2 - a * np.cos(2 * np.pi * xi)) for xi in x])
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     A = [[X[x] for _ in range(amount_of_points)] for x in range(amount_of_points)]
     B = [[Y[y] for y in range(amount_of_points)] for _ in range(amount_of_points)]
-    C = [[rastrigin([X[x], Y[y]]) for y in range(amount_of_points)] for x in range(amount_of_points)]
+    C = [[func([X[x], Y[y]]) for y in range(amount_of_points)] for x in range(amount_of_points)]
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')

@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
-minSchwef = -500
-maxSchwef = 500
+LB = -500
+UB = 500
 
-def schwefel(x):
+def func(x):
     dim = len(x)
     return 418.9829 * dim - np.sum([(x_i * np.sin(np.sqrt(np.abs(x_i)))) for x_i in x])
 
@@ -15,12 +15,12 @@ def generate_points(min_val, max_val, num_points):
 
 if __name__ == "__main__":
     dimension, amount_of_points = 2, 100
-    X = generate_points(minSchwef, maxSchwef, amount_of_points)
-    Y = generate_points(minSchwef, maxSchwef, amount_of_points)
+    X = generate_points(LB, UB, amount_of_points)
+    Y = generate_points(LB, UB, amount_of_points)
 
     A = [[X[x] for _ in range(amount_of_points)] for x in range(amount_of_points)]
     B = [[Y[y] for y in range(amount_of_points)] for _ in range(amount_of_points)]
-    C = [[schwefel([X[x], Y[y]]) for y in range(amount_of_points)] for x in range(amount_of_points)]
+    C = [[func([X[x], Y[y]]) for y in range(amount_of_points)] for x in range(amount_of_points)]
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')

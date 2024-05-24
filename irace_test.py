@@ -1,14 +1,21 @@
 import math
 import random
-import numpy as np
 import copy
-from rastrigin import rastrigin
-from sphere import sphere_function
+
+import numpy as np
 from irace import irace
 
-func = rastrigin
-LB = [-5.12]
-UB = [5.12]
+from rastrigin import func
+from rastrigin import LB, UB
+
+# from sphere import func
+# from sphere import LB, UB
+
+# from schaffer import func
+# from schaffer import LB, UB
+
+# from schwefel import func
+# from schwefel import LB, UB
 
 DIM = 100
 

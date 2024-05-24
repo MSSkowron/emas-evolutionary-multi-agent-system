@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
-minSchaff = -100
-maxSchaff = 100
+LB = -100
+UB = 100
 
-def schaffer(x):
+def func(x):
     x, y = x[0], x[1]
     return 0.5 + (np.square(np.sin(np.square(x)-np.square(y))) - 0.5)/np.square(1+0.001*(np.square(x)+np.square(y)))
 
@@ -16,12 +16,12 @@ def generate_points(min_val, max_val, num_points):
 
 if __name__ == "__main__":
     dimension, amount_of_points = 2, 100
-    X = generate_points(minSchaff, maxSchaff, amount_of_points)
-    Y = generate_points(minSchaff, maxSchaff, amount_of_points)
+    X = generate_points(LB, UB, amount_of_points)
+    Y = generate_points(LB, UB, amount_of_points)
 
     A = [[X[x] for _ in range(amount_of_points)] for x in range(amount_of_points)]
     B = [[Y[y] for y in range(amount_of_points)] for _ in range(amount_of_points)]
-    C = [[schaffer([X[x], Y[y]]) for y in range(amount_of_points)] for x in range(amount_of_points)]
+    C = [[func([X[x], Y[y]]) for y in range(amount_of_points)] for x in range(amount_of_points)]
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')

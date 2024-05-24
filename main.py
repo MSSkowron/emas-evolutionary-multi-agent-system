@@ -1,22 +1,28 @@
 import json
 import math
 import random
-from rastrigin import rastrigin, minRast, maxRast
-from schaffer import schaffer, minSchaff, maxSchaff
-from schwefel import schwefel, minSchwef, maxSchwef
-from sphere import sphere, minSphere, maxSphere
-import numpy as np
-import matplotlib.pyplot as plt
 import copy
 import time
 
-fitness_function = sphere
+import numpy as np
+import matplotlib.pyplot as plt
+
+from rastrigin import func
+from rastrigin import LB, UB
+
+# from sphere import func
+# from sphere import LB, UB
+
+# from schaffer import func
+# from schaffer import LB, UB
+
+# from schwefel import func
+# from schwefel import LB, UB
+
+dimensions = 100
 
 numberOfIterations = 30000
 numberOfAgents = 40
-dimensions = 100
-minVal = minSphere
-maxVal = maxSphere
 
 settings = {
     "startEnergy": 1000,
@@ -35,7 +41,7 @@ class Agent:
     def __init__(self, x, energy=settings["startEnergy"]):
         self.x = x
         self.energy = energy
-        self.fitness = fitness_function(x)
+        self.fitness = func(x)
 
     @staticmethod
     def crossover(parent1, parent2):
@@ -91,7 +97,7 @@ class Agent:
 
             if rand <= 1 / len(x):
                 y = x[i]
-                yl, yu = minVal, maxVal
+                yl, yu = LB, UB
 
                 if yl == yu:
                     y = yl
@@ -112,10 +118,10 @@ class Agent:
                         deltaq = 1.0 - pow(val, mut_pow)
 
                     y += deltaq * (yu - yl)
-                    if y < minVal:
-                        y = minVal
-                    if y > maxVal:
-                        y = maxVal
+                    if y < LB:
+                        y = LB
+                    if y > UB:
+                        y = UB
                 x[i] = y
         return x
 
@@ -137,12 +143,12 @@ class Agent:
 
         mutation_probability_x1 = mutation_probability_x2 = settings["mutation_probability"]
 
-        if fitness_function(newborn_x1) < f_avg:
+        if func(newborn_x1) < f_avg:
             mutation_probability_x1 /= 2
         else:
             mutation_probability_x1 *= 2
 
-        if fitness_function(newborn_x2) < f_avg:
+        if func(newborn_x2) < f_avg:
             mutation_probability_x2 /= 2
         else:
             mutation_probability_x2 *= 2
@@ -239,11 +245,11 @@ class EMAS:
 
 
 def generate_agents():
-    return [Agent([random.uniform(minVal, maxVal) for _ in range(dimensions)]) for _ in range(numberOfAgents)]
+    return [Agent([random.uniform(LB, UB) for _ in range(dimensions)]) for _ in range(numberOfAgents)]
 
 
 def save_to_file(output, start_time, name):
-    settings['function'] = fitness_function.__name__
+    settings['function'] = func.__name__
     settings['iterations'] = numberOfIterations
     settings['agents'] = numberOfAgents
     settings['dimensions'] = dimensions
@@ -403,9 +409,9 @@ def main():
     ax[4, 1].grid()
 
     plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0.3, hspace=0.3)
-    fig.suptitle(fitness_function.__name__ + ' minimization', fontsize=14)
+    fig.suptitle(func.__name__ + ' minimization', fontsize=14)
     # plt.show()
-    name = "results/"+fitness_function.__name__+"_"+str(time.time())
+    name = "results/"+func.__name__+"_"+str(time.time())
     plt.savefig(name+".png")
     save_to_file(output, start_time, name)
 
