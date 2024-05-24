@@ -20,7 +20,7 @@ from rastrigin import LB, UB
 DIM = 100
 
 numberOfIterations = 1000
-numberOfAgents = 40
+numberOfAgents = 20
 
 parameters_table = '''
 start_energy                 "" i (10,100)
