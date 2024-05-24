@@ -23,20 +23,20 @@ numberOfIterations = 100
 numberOfAgents = 40
 
 parameters_table = '''
-start_energy                 "" i (0,5000)
-mutation_probability         "" r (0,1)
-crossover_probability        "" r (0,1)
-distribution_index           "" r (0,1)
-fight_loss_energy            "" r (0,1)
-reproduce_loss_energy        "" r (0,1)
-reproduce_req_energy         "" i (0,10000)
-death_threshold              "" i (0,10)
+start_energy                 "" i (10,100)
+mutation_probability         "" r (0.1,1)
+crossover_probability        "" r (0.1,1)
+distribution_index           "" r (0.1,1)
+fight_loss_energy            "" r (0.1,1)
+reproduce_loss_energy        "" r (0.1,1)
+reproduce_req_energy         "" i (10,100)
+death_threshold              "" i (1,10)
 crowding_factor              "" i (50,150)
 '''
 
 default_values = '''
     start_energy mutation_probability  crossover_probability distribution_index fight_loss_energy reproduce_loss_energy reproduce_req_energy death_threshold crowding_factor
-    1000         1                     0.5                   0.2                0.05              0.3                   1700                 8               100                    
+    50         1                     0.5                   0.2                0.2              0.3                   50                 8               100                    
 '''
 
 
@@ -107,7 +107,7 @@ class Agent:
 
             if rand <= 1 / len(x):
                 y = x[i]
-                yl, yu = LB[0], UB[0]
+                yl, yu = LB, UB
 
                 if yl == yu:
                     y = yl
@@ -128,10 +128,10 @@ class Agent:
                         deltaq = 1.0 - pow(val, mut_pow)
 
                     y += deltaq * (yu - yl)
-                    if y < LB[0]:
-                        y = LB[0]
-                    if y > UB[0]:
-                        y = UB[0]
+                    if y < LB:
+                        y = LB
+                    if y > UB:
+                        y = UB
                 x[i] = y
         return x
 
@@ -252,7 +252,7 @@ class EMAS:
 
 
 def generate_agents(settings):
-    return [Agent([random.uniform(LB[0], UB[0]) for _ in range(DIM)], settings) for _ in range(numberOfAgents)]
+    return [Agent([random.uniform(LB, UB) for _ in range(DIM)], settings) for _ in range(numberOfAgents)]
 
 
 def optimize(seed, config):
