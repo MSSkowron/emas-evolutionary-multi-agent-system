@@ -21,8 +21,8 @@ from rastrigin import LB, UB
 
 dimensions = 100
 
-numberOfIterations = 30000
-numberOfAgents = 40
+numberOfIterations = 3000
+numberOfAgents = 20
 
 settings = {
     "startEnergy": 1000,
@@ -36,12 +36,16 @@ settings = {
     "crowdingFactor":1000
 }
 
+fitness_evaluation = 0
 
 class Agent:
     def __init__(self, x, energy=settings["startEnergy"]):
         self.x = x
         self.energy = energy
         self.fitness = func(x)
+
+        global fitness_evaluation
+        fitness_evaluation +=1
 
     @staticmethod
     def crossover(parent1, parent2):
@@ -143,15 +147,15 @@ class Agent:
 
         mutation_probability_x1 = mutation_probability_x2 = settings["mutation_probability"]
 
-        if newborn_x1.fitness < f_avg:
-            mutation_probability_x1 /= 2
-        else:
-            mutation_probability_x1 *= 2
+        # if func(newborn_x1) < f_avg:
+        #     mutation_probability_x1 /= 2
+        # else:
+        #     mutation_probability_x1 *= 2
 
-        if newborn_x2.fitness < f_avg:
-            mutation_probability_x2 /= 2
-        else:
-            mutation_probability_x2 *= 2
+        # if func(newborn_x2) < f_avg:
+        #     mutation_probability_x2 /= 2
+        # else:
+        #     mutation_probability_x2 *= 2
 
         random_number = random.random()
         if random_number < mutation_probability_x1:
@@ -283,7 +287,6 @@ def main():
         if it%50 == 0:
             print(it, agents_num)
 
-
         # Min and Max standard deviations along each dimension for agents
         vectors = np.array([agent.x for agent in emas.agents])
         std = np.std(vectors, axis=0)
@@ -297,17 +300,18 @@ def main():
 
         # Add data
         data.append((
-            agents_num,
-            born_num,
-            dead_num,
-            best_agent.fitness,
-            np.average([agent.fitness for agent in emas.agents]),
-            best_agent.energy,
-            np.average([agent.energy for agent in emas.agents]),
-            min_std,
-            max_std,
-            energy_sum
+                agents_num,
+                born_num,
+                dead_num,
+                best_agent.fitness,
+                np.average([agent.fitness for agent in emas.agents]),
+                best_agent.energy,
+                np.average([agent.energy for agent in emas.agents]),
+                min_std,
+                max_std,
+                energy_sum
         ))
+
         if it%100 == 0:
             print(f'\n\n')
             print(best_agent.fitness)
@@ -323,6 +327,8 @@ def main():
     print("Total number of born agents:", total_number_of_born)
     print("Total number of dead agents:", total_number_of_dead)
     print()
+
+    print(fitness_evaluation)
 
     best_agent = min(emas.agents, key=lambda agent: agent.fitness)
 
