@@ -33,7 +33,7 @@ settings = {
 
 dimensions = 100
 numberOfAgents = 20
-maxNumberOfFitnessEvaluations = 10000
+maxNumberOfFitnessEvaluations = 100000
 
 numberOfFitnessEvaluations = 0
 numberOfBornAgents, numberOfDeadAgents = 0, 0
@@ -57,7 +57,8 @@ def update_data():
     max_std = np.max(std)
 
     best_agent = min(emas.agents, key=lambda agent: agent.fitness)
-
+    if len(data) % 100 == 0:
+        print(f"Evaluation: {len(data)} fitness: {best_agent.fitness}")
     data.append((
         agents_num,
         numberOfBornAgents,
