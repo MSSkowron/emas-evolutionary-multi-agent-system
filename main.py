@@ -8,16 +8,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from rastrigin import func
-from rastrigin import LB, UB
+from rastrigin import LB, UB, funcName
 
 # from sphere import func
-# from sphere import LB, UB
+# from sphere import LB, UB, funcName
 
 # from schaffer import func
-# from schaffer import LB, UB
+# from schaffer import LB, UB, funcName
 
 # from schwefel import func
-# from schwefel import LB, UB
+# from schwefel import LB, UB, funcName
 
 settings = {
     "startEnergy": 1000,
@@ -33,7 +33,7 @@ settings = {
 
 dimensions = 100
 numberOfAgents = 20
-maxNumberOfFitnessEvaluations = 100000
+maxNumberOfFitnessEvaluations = 1000
 
 numberOfFitnessEvaluations = 0
 numberOfBornAgents, numberOfDeadAgents = 0, 0
@@ -297,7 +297,7 @@ class EMAS:
 
 
 def save_to_file(file_name, output, start_time, end_time):
-    settings['function'] = func.__name__
+    settings['function'] = funcName
     settings['agents'] = numberOfAgents
     settings['dimensions'] = dimensions
     settings['output'] = output
@@ -407,6 +407,6 @@ axes[2, 1].set_xlabel('Fitness evaluations')
 axes[2, 1].set_ylabel('Energy')
 
 # plt.show()
-file_name = "results/"+func.__name__+"_"+str(time.time())
+file_name = "results/"+funcName+"_"+str(time.time())
 plt.savefig(file_name+".png")
 save_to_file(file_name+".txt", output, start_time, end_time)

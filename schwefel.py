@@ -4,6 +4,7 @@ import matplotlib
 
 LB = -500
 UB = 500
+funcName = "Schwefel"
 
 def func(x):
     dim = len(x)
