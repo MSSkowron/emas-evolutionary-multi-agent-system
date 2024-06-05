@@ -4,6 +4,7 @@ import matplotlib
 
 LB = -100
 UB = 100
+funcName = "Schaffer"
 
 def func(x):
     x, y = x[0], x[1]

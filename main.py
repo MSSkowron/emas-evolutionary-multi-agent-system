@@ -8,21 +8,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from rastrigin import func
-from rastrigin import LB, UB
+from rastrigin import LB, UB, funcName
 
 # from sphere import func
-# from sphere import LB, UB
+# from sphere import LB, UB, funcName
 
 # from schaffer import func
-# from schaffer import LB, UB
+# from schaffer import LB, UB, funcName
 
 # from schwefel import func
-# from schwefel import LB, UB
-
-dimensions = 100
-
-numberOfIterations = 3000
-numberOfAgents = 20
+# from schwefel import LB, UB, funcName
 
 settings = {
     "startEnergy": 1000,
@@ -32,11 +27,51 @@ settings = {
     "fightLossEnergy": 0.05,
     "reproduceLossEnergy": 0.3,
     "reproduceReqEnergy": 1700,
-    "deathThreshold":8,
-    "crowdingFactor":1000
+    "deathThreshold": 8,
+    "crowdingFactor": 1000
 }
 
-fitness_evaluation = 0
+dimensions = 100
+numberOfAgents = 20
+maxNumberOfFitnessEvaluations = 1000
+
+numberOfFitnessEvaluations = 0
+numberOfBornAgents, numberOfDeadAgents = 0, 0
+
+emasIsRunning = False
+data = []
+
+
+def update_data():
+    global data, numberOfBornAgents, numberOfDeadAgents, emasIsRunning
+
+    if not emasIsRunning:
+        return
+
+    agents_num = len(emas.agents)
+    energy_sum = np.sum([agent.energy for agent in emas.agents])
+
+    vectors = np.array([agent.x for agent in emas.agents])
+    std = np.std(vectors, axis=0)
+    min_std = np.min(std)
+    max_std = np.max(std)
+
+    best_agent = min(emas.agents, key=lambda agent: agent.fitness)
+    if len(data) % 100 == 0:
+        print(f"Evaluation: {len(data)} fitness: {best_agent.fitness}")
+    data.append((
+        agents_num,
+        numberOfBornAgents,
+        numberOfDeadAgents,
+        best_agent.fitness,
+        np.mean([agent.fitness for agent in emas.agents]),
+        best_agent.energy,
+        np.mean([agent.energy for agent in emas.agents]),
+        min_std,
+        max_std,
+        energy_sum
+    ))
+
 
 class Agent:
     def __init__(self, x, energy=settings["startEnergy"]):
@@ -44,8 +79,10 @@ class Agent:
         self.energy = energy
         self.fitness = func(x)
 
-        global fitness_evaluation
-        fitness_evaluation +=1
+        global numberOfFitnessEvaluations
+        numberOfFitnessEvaluations += 1
+
+        update_data()
 
     @staticmethod
     def crossover(parent1, parent2):
@@ -53,7 +90,8 @@ class Agent:
         offspring = copy.deepcopy(parents)
         permutation_length = len(offspring[0].x)
 
-        cross_points = sorted([random.randint(0, permutation_length) for _ in range(2)])
+        cross_points = sorted(
+            [random.randint(0, permutation_length) for _ in range(2)])
 
         def _repeated(element, collection):
             c = 0
@@ -78,8 +116,10 @@ class Agent:
                     for i_son in range(2):
                         while _repeated(swapped[i_son][i_chromosome], swapped[i_son]):
                             try:
-                                map_index = map_[i_son].index(swapped[i_son][i_chromosome])
-                                swapped[i_son][i_chromosome] = map_[1 - i_son][map_index]
+                                map_index = map_[i_son].index(
+                                    swapped[i_son][i_chromosome])
+                                swapped[i_son][i_chromosome] = map_[
+                                    1 - i_son][map_index]
                             except ValueError as ve:
                                 print('ValueError encountered, Action skipped')
                                 break
@@ -91,8 +131,6 @@ class Agent:
         offspring[0].x, offspring[1].x = mapped
 
         return offspring[0].x, offspring[1].x
-
-
 
     @staticmethod
     def mutate(x):
@@ -139,11 +177,9 @@ class Agent:
 
         # Possible crossover
         if random.random() < settings["crossover_probability"]:
-            newborns = Agent.crossover(parent1, parent2)
-            newborn_x1, newborn_x2 = newborns[0], newborns[1]
+            newborn_x1, newborn_x2 = Agent.crossover(parent1, parent2)
         else:
-            newborns = Agent.crossover(parent2, parent1)
-            newborn_x1, newborn_x2 = newborns[0], newborns[1]
+            newborn_x1, newborn_x2 = Agent.crossover(parent2, parent1)
 
         mutation_probability_x1 = mutation_probability_x2 = settings["mutation_probability"]
 
@@ -175,26 +211,28 @@ class Agent:
             energy = agent_2.energy * loss_energy
             agent_1.energy += energy
             agent_2.energy -= energy
-            if d<settings["crowdingFactor"]:
-                energy =  agent_2.energy * (1-d**2/settings["crowdingFactor"]**2)
+            if d < settings["crowdingFactor"]:
+                energy = agent_2.energy * \
+                    (1-d**2/settings["crowdingFactor"]**2)
                 agent_1.energy += energy
                 agent_2.energy -= energy
         else:
             energy = agent_1.energy * loss_energy
             agent_1.energy -= energy
             agent_2.energy += energy
-            if d<settings["crowdingFactor"]:
-                energy =  agent_1.energy * (1-d**2/settings["crowdingFactor"]**2)
+            if d < settings["crowdingFactor"]:
+                energy = agent_1.energy * \
+                    (1-d**2/settings["crowdingFactor"]**2)
                 agent_1.energy -= energy
                 agent_2.energy += energy
 
-        agent_1.energy = np.true_divide(np.floor(agent_1.energy * 10**settings["deathThreshold"]), 10**settings["deathThreshold"])
-        agent_2.energy = np.true_divide(np.floor(agent_2.energy * 10**settings["deathThreshold"]), 10**settings["deathThreshold"])
-
+        agent_1.energy = np.true_divide(np.floor(
+            agent_1.energy * 10**settings["deathThreshold"]), 10**settings["deathThreshold"])
+        agent_2.energy = np.true_divide(np.floor(
+            agent_2.energy * 10**settings["deathThreshold"]), 10**settings["deathThreshold"])
 
     def is_dead(self):
         return self.energy <= 0
-
 
 
 class EMAS:
@@ -202,14 +240,24 @@ class EMAS:
         self.agents = agents
 
     def run_iteration(self):
+        global numberOfBornAgents, numberOfDeadAgents
+
+        # shuffle
         random.shuffle(self.agents)
 
+        # reproduce
         children = self.reproduce()
-        self.fight()
-        self.agents.extend(children)
-        dead = self.clear()
+        numberOfBornAgents += len(children)
 
-        return len(children), len(dead)
+        # fight
+        self.fight()
+
+        # update agents' array
+        self.agents.extend(children)
+
+        # remove dead
+        dead = self.clear()
+        numberOfDeadAgents += len(dead)
 
     def reproduce(self):
         req_energy = settings["reproduceReqEnergy"]
@@ -248,181 +296,117 @@ class EMAS:
         return dead
 
 
-def generate_agents():
-    return [Agent([random.uniform(LB, UB) for _ in range(dimensions)]) for _ in range(numberOfAgents)]
-
-
-def save_to_file(output, start_time, name):
-    settings['function'] = func.__name__
-    settings['iterations'] = numberOfIterations
+def save_to_file(file_name, output, start_time, end_time):
+    settings['function'] = funcName
     settings['agents'] = numberOfAgents
     settings['dimensions'] = dimensions
     settings['output'] = output
-    settings['time'] = time.time() - start_time
+    settings['time'] = end_time - start_time
     try:
-        with open(name+".txt", 'a+') as file:
+        with open(file_name, 'a+') as file:
             json.dump(settings, file, indent=4)
             file.write('\n')
     except Exception as e:
         print("Error while saving results to file:", e)
 
 
-def main():
-    start_time=time.time()
-    agents = generate_agents()
+'''
+==============
+main()
+==============
+'''
 
-    emas = EMAS(agents)
+start_time = time.time()
 
-    total_number_of_born, total_number_of_dead = 0, 0
-    data = []
+emas = EMAS([Agent([random.uniform(LB, UB) for _ in range(dimensions)])
+            for _ in range(numberOfAgents)])
+emasIsRunning = True
 
-    for it in range(numberOfIterations):
-        # Number of agents, born agents and dead agents
-        born_num, dead_num = emas.run_iteration()
-        total_number_of_born += born_num
-        total_number_of_dead += dead_num
-        agents_num = len(emas.agents)
-        energy_sum = np.sum([agent.energy for agent in emas.agents])
+update_data()
 
-        if it%50 == 0:
-            print(it, agents_num)
+while numberOfFitnessEvaluations < maxNumberOfFitnessEvaluations:
+    emas.run_iteration()
 
-        # Min and Max standard deviations along each dimension for agents
-        vectors = np.array([agent.x for agent in emas.agents])
-        std = np.std(vectors, axis=0)
-        min_std = min(std)
-        max_std = max(std)
+end_time = time.time()
 
-        # Best agent based on its fitness
-        best_agent = min(emas.agents, key=lambda agent: agent.fitness)
-        lowest_energy = min(emas.agents, key=lambda agent: agent.energy).energy
-        # print(it, agents_num)
+print("Number of agents left:", len(emas.agents))
+print()
+print("Total number of fitness evaluations:", numberOfFitnessEvaluations)
+print()
+print("Total number of born agents:", numberOfBornAgents)
+print("Total number of dead agents:", numberOfDeadAgents)
+print()
 
-        # Add data
-        data.append((
-                agents_num,
-                born_num,
-                dead_num,
-                best_agent.fitness,
-                np.average([agent.fitness for agent in emas.agents]),
-                best_agent.energy,
-                np.average([agent.energy for agent in emas.agents]),
-                min_std,
-                max_std,
-                energy_sum
-        ))
+best_agent = min(emas.agents, key=lambda agent: agent.fitness)
 
-        if it%100 == 0:
-            print(f'\n\n')
-            print(best_agent.fitness)
-            # for item in data:
-            #     print(item)
-            # print(f"\n{it}")
-            # print(f"Lowest energy: {lowest_energy}")
-            # print(len(emas.agents),[agent.energy for agent in emas.agents])
-            # input()
+for i in range(len(best_agent.x)):
+    best_agent.x[i] = round(best_agent.x[i], 2)
 
-    print("Number of agents left:", len(emas.agents))
-    print()
-    print("Total number of born agents:", total_number_of_born)
-    print("Total number of dead agents:", total_number_of_dead)
-    print()
+output = f"Minimum in {best_agent.x} equals = {best_agent.fitness:.2f} for agent with energy equals = {best_agent.energy:.2f}"
+print(output)
 
-    print(fitness_evaluation)
+agents_num, born_agents, dead_agents = [], [], []
+best_fitness, avg_fitness = [], []
+best_energy, avg_energy = [], []
+std_min, std_max = [], []
+energy_sum = []
 
-    best_agent = min(emas.agents, key=lambda agent: agent.fitness)
+for i, snapshot in enumerate(data):
+    agents_num.append(snapshot[0])
+    born_agents.append(snapshot[1])
+    dead_agents.append(snapshot[2])
+    best_fitness.append(snapshot[3])
+    avg_fitness.append(snapshot[4])
+    best_energy.append(snapshot[5])
+    avg_energy.append(snapshot[6])
+    std_min.append(snapshot[7])
+    std_max.append(snapshot[8])
+    energy_sum.append(snapshot[9])
 
-    for i in range(len(best_agent.x)):
-        best_agent.x[i] = round(best_agent.x[i], 2)
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(15, 12))
+fig.tight_layout(pad=5.0)
 
-    output = f"Minimum in {best_agent.x} equals = {best_agent.fitness:.2f} for agent with energy equals = {best_agent.energy:.2f}"
-    print(output)
+axes[0, 0].plot(best_fitness, label='Best Fitness')
+axes[0, 0].plot(avg_fitness, label='Average Fitness')
+axes[0, 0].legend()
+axes[0, 0].set_title('Fitness over Time')
+axes[0, 0].set_xlabel('Fitness evaluations')
+axes[0, 0].set_ylabel('Fitness')
 
-    iteration_data = list(range(len(data)))
-    number_of_agents = [item[0] for item in data]
-    number_of_born_agents = [item[1] for item in data]
-    number_of_dead_agents = [item[2] for item in data]
-    best_fitness = [item[3] for item in data]
-    avg_fitness = [item[4] for item in data]
-    best_energy = [item[5] for item in data]
-    avg_energy = [item[6] for item in data]
-    min_std = [item[7] for item in data]
-    max_std = [item[8] for item in data]
-    sum_energy = [item[9] for item in data]
+axes[0, 1].plot(best_energy, label='Best Energy')
+axes[0, 1].plot(avg_energy, label='Average Energy')
+axes[0, 1].legend()
+axes[0, 1].set_title('Energy over Time')
+axes[0, 1].set_xlabel('Fitness evaluations')
+axes[0, 1].set_ylabel('Energy')
 
-    fig, ax = plt.subplots(5, 2)
-    fig.set_figheight(30)
-    fig.set_figwidth(20)
+axes[1, 0].plot(agents_num, label='Number of Agents')
+axes[1, 0].legend()
+axes[1, 0].set_title('Agents over Time')
+axes[1, 0].set_xlabel('Fitness evaluations')
+axes[1, 0].set_ylabel('Number of Agents')
 
-    ax[0, 0].plot(iteration_data, number_of_agents, marker='o', linestyle='-')
-    ax[0, 0].set_title("Number of agents after each iterations")
-    ax[0, 0].set_xlabel("Iteration")
-    ax[0, 0].set_ylabel("Number of agents")
-    ax[0, 0].grid()
+axes[1, 1].plot(std_min, label='Minimum Std Dev')
+axes[1, 1].plot(std_max, label='Maximum Std Dev')
+axes[1, 1].legend()
+axes[1, 1].set_title('Diversity over Time')
+axes[1, 1].set_xlabel('Fitness evaluations')
+axes[1, 1].set_ylabel('Standard Deviation')
 
-    ax[0, 1].plot(iteration_data, sum_energy, marker='o', linestyle='-')
-    ax[0, 1].set_title("Energy sum")
-    ax[0, 1].set_xlabel("Iteration")
-    ax[0, 1].set_ylabel("Energy sum")
-    ax[0, 1].grid()
+axes[2, 0].plot(born_agents, label='Born Agents')
+axes[2, 0].plot(dead_agents, label='Dead Agents')
+axes[2, 0].legend()
+axes[2, 0].set_title('Total Born and Dead Agents over Time')
+axes[2, 0].set_xlabel('Fitness evaluations')
+axes[2, 0].set_ylabel('Number of Agents')
 
-    ax[1, 0].plot(iteration_data, number_of_born_agents, marker='o', linestyle='-')
-    ax[1, 0].set_title("Number of born agents after each iteration")
-    ax[1, 0].set_xlabel("Iteration")
-    ax[1, 0].set_ylabel("Born")
-    ax[1, 0].grid()
+axes[2, 1].plot(energy_sum, label='Total Energy')
+axes[2, 1].legend()
+axes[2, 1].set_title('Total Energy over Time')
+axes[2, 1].set_xlabel('Fitness evaluations')
+axes[2, 1].set_ylabel('Energy')
 
-    ax[1, 1].plot(iteration_data, number_of_dead_agents, marker='o', linestyle='-')
-    ax[1, 1].set_title("Number of dead agents after each iteration")
-    ax[1, 1].set_xlabel("Iteration")
-    ax[1, 1].set_ylabel("Dead")
-    ax[1, 1].grid()
-
-    ax[2, 0].plot(iteration_data, best_fitness, marker='o', linestyle='-')
-    ax[2, 0].set_title("Best fitness after each iteration")
-    ax[2, 0].set_xlabel("Iteration")
-    ax[2, 0].set_ylabel("Best fitness")
-    ax[2, 0].grid()
-
-    ax[2, 1].plot(iteration_data, avg_fitness, marker='o', linestyle='-')
-    ax[2, 1].set_title("Average fitness after each iteration")
-    ax[2, 1].set_xlabel("Iteration")
-    ax[2, 1].set_ylabel("Avg fitness")
-    ax[2, 1].grid()
-
-    ax[3, 0].plot(iteration_data, best_energy, marker='o', linestyle='-')
-    ax[3, 0].set_title("Best energy after each iteration")
-    ax[3, 0].set_xlabel("Iteration")
-    ax[3, 0].set_ylabel("Best energy")
-    ax[3, 0].grid()
-
-    ax[3, 1].plot(iteration_data, avg_energy, marker='o', linestyle='-')
-    ax[3, 1].set_title("Average energy after each iteration")
-    ax[3, 1].set_xlabel("Iteration")
-    ax[3, 1].set_ylabel("Avg energy")
-    ax[3, 1].grid()
-
-    ax[4, 0].plot(iteration_data, min_std, marker='o', linestyle='-')
-    ax[4, 0].set_title("Min standard deviation after each iteration")
-    ax[4, 0].set_xlabel("Iteration")
-    ax[4, 0].set_ylabel("min std")
-    ax[4, 0].grid()
-
-    ax[4, 1].plot(iteration_data, max_std, marker='o', linestyle='-')
-    ax[4, 1].set_title("Max standard deviation after each iteration")
-    ax[4, 1].set_xlabel("Iteration")
-    ax[4, 1].set_ylabel("max std")
-    ax[4, 1].grid()
-
-    plt.subplots_adjust(left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0.3, hspace=0.3)
-    fig.suptitle(func.__name__ + ' minimization', fontsize=14)
-    # plt.show()
-    name = "results/"+func.__name__+"_"+str(time.time())
-    plt.savefig(name+".png")
-    save_to_file(output, start_time, name)
-
-
-if __name__ == "__main__":
-
-    main()
-
+# plt.show()
+file_name = "results/"+funcName+"_"+str(time.time())
+plt.savefig(file_name+".png")
+save_to_file(file_name+".txt", output, start_time, end_time)

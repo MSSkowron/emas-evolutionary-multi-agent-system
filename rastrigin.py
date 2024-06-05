@@ -4,6 +4,7 @@ import matplotlib
 
 LB = -5.12
 UB = 5.12
+funcName = "Rastrigin"
 
 def func(x, a=10):
     dim = len(x)

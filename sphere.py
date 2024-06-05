@@ -4,6 +4,7 @@ import matplotlib
 
 LB=-5.12
 UB=5.12
+funcName = "Sphere"
 
 def func(x):
     return np.sum([xi ** 2 for xi in x])
