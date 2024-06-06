@@ -1,18 +1,15 @@
-from jmetal.algorithm.multiobjective.nsgaii import NSGAII
-from jmetal.operator import PolynomialMutation, SBXCrossover
+from jmetal.algorithm.multiobjective.spea2 import SPEA2
+from jmetal.operator import SBXCrossover, PolynomialMutation
 from jmetal.problem.singleobjective.unconstrained import Rastrigin
-from jmetal.util.comparator import DominanceComparator
-from jmetal.util.solution import print_function_values_to_file, print_variables_to_file, get_non_dominated_solutions, print_function_values_to_file
 from jmetal.util.termination_criterion import StoppingByEvaluations
-from jmetal.lab.visualization import Plot
-from jmetal.util.observer import Observer, VisualizerObserver
+from jmetal.util.observer import Observer
 import matplotlib.pyplot as plt
 import time
 
 dimensions = 100
-numberOfAgents = 20
+numberOfAgents = 100
 maxNumberOfFitnessEvaluations = 100000
-algorithm_name = "NSGAII"
+algorithm_name = "SPEA2"
 
 data = [[],[]]
 
@@ -39,18 +36,16 @@ class PrintObjectivesObserver(Observer):
             data[1].append(fitness)
 
 def solve(problem):
-    max_evaluations = maxNumberOfFitnessEvaluations
+    global maxNumberOfFitnessEvaluations, numberOfAgents
 
-    algorithm = NSGAII(
+    algorithm = SPEA2(
         problem=problem,
         population_size=numberOfAgents,
         offspring_population_size=numberOfAgents,
-        mutation=PolynomialMutation(probability=1.0 / problem.number_of_variables(), distribution_index=20.0),
-        crossover=SBXCrossover(probability=0.9, distribution_index=20.0),
-        termination_criterion=StoppingByEvaluations(max_evaluations=max_evaluations),
-        dominance_comparator=DominanceComparator(),
+        mutation=PolynomialMutation(probability=1.0 / problem.number_of_variables(), distribution_index=20),
+        crossover=SBXCrossover(probability=1.0, distribution_index=20),
+        termination_criterion=StoppingByEvaluations(max_evaluations=maxNumberOfFitnessEvaluations)
     )
-
     algorithm.observable.register(observer=PrintObjectivesObserver(100))
 
     algorithm.run()

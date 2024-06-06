@@ -1,4 +1,4 @@
-from jmetal.algorithm.multiobjective.nsgaii import NSGAII
+from jmetal.algorithm.singleobjective.evolution_strategy import EvolutionStrategy
 from jmetal.operator import PolynomialMutation, SBXCrossover
 from jmetal.problem.singleobjective.unconstrained import Rastrigin
 from jmetal.util.comparator import DominanceComparator
@@ -12,7 +12,7 @@ import time
 dimensions = 100
 numberOfAgents = 20
 maxNumberOfFitnessEvaluations = 100000
-algorithm_name = "NSGAII"
+algorithm_name = "EvolutionStrategy"
 
 data = [[],[]]
 
@@ -39,16 +39,15 @@ class PrintObjectivesObserver(Observer):
             data[1].append(fitness)
 
 def solve(problem):
-    max_evaluations = maxNumberOfFitnessEvaluations
+    global maxNumberOfFitnessEvaluations
 
-    algorithm = NSGAII(
+    algorithm = EvolutionStrategy(
         problem=problem,
-        population_size=numberOfAgents,
-        offspring_population_size=numberOfAgents,
-        mutation=PolynomialMutation(probability=1.0 / problem.number_of_variables(), distribution_index=20.0),
-        crossover=SBXCrossover(probability=0.9, distribution_index=20.0),
-        termination_criterion=StoppingByEvaluations(max_evaluations=max_evaluations),
-        dominance_comparator=DominanceComparator(),
+        mu=numberOfAgents,
+        lambda_=numberOfAgents,
+        elitist=True,
+        mutation=PolynomialMutation(probability=1.0 / problem.number_of_variables()),
+        termination_criterion=StoppingByEvaluations(max_evaluations=maxNumberOfFitnessEvaluations),
     )
 
     algorithm.observable.register(observer=PrintObjectivesObserver(100))
