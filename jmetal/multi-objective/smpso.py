@@ -1,18 +1,16 @@
-from jmetal.algorithm.multiobjective.nsgaii import NSGAII
-from jmetal.operator import PolynomialMutation, SBXCrossover
-from jmetal.problem.singleobjective.unconstrained import Rastrigin
-from jmetal.util.comparator import DominanceComparator
-from jmetal.util.solution import print_function_values_to_file, print_variables_to_file, get_non_dominated_solutions, print_function_values_to_file
+from jmetal.algorithm.multiobjective.smpso import SMPSO
+from jmetal.util.archive import CrowdingDistanceArchive
 from jmetal.util.termination_criterion import StoppingByEvaluations
-from jmetal.lab.visualization import Plot
+from jmetal.problem.singleobjective.unconstrained import Rastrigin
 from jmetal.util.observer import Observer, VisualizerObserver
 import matplotlib.pyplot as plt
 import time
+from jmetal.operator import PolynomialMutation
 
 dimensions = 100
-numberOfAgents = 20
-maxNumberOfFitnessEvaluations = 100000
-algorithm_name = "NSGAII"
+swarm_size = 100
+maxNumberOfFitnessEvaluations = 2000
+algorithm_name = "SMPSO"
 
 data = [[],[]]
 
@@ -38,26 +36,20 @@ class PrintObjectivesObserver(Observer):
             data[0].append(evaluations)
             data[1].append(fitness)
 
+
 def solve(problem):
-    max_evaluations = maxNumberOfFitnessEvaluations
+    global swarm_size, maxNumberOfFitnessEvaluations
 
-    algorithm = NSGAII(
+    algorithm = SMPSO(
         problem=problem,
-        population_size=numberOfAgents,
-        offspring_population_size=numberOfAgents,
-        mutation=PolynomialMutation(probability=1.0 / problem.number_of_variables(), distribution_index=20.0),
-        crossover=SBXCrossover(probability=0.9, distribution_index=20.0),
-        termination_criterion=StoppingByEvaluations(max_evaluations=max_evaluations),
-        dominance_comparator=DominanceComparator(),
+        swarm_size=swarm_size,
+        mutation=PolynomialMutation(probability=1.0 / problem.number_of_variables(), distribution_index=20),
+        leaders=CrowdingDistanceArchive(100),
+        termination_criterion=StoppingByEvaluations(max_evaluations=maxNumberOfFitnessEvaluations)
     )
-
     algorithm.observable.register(observer=PrintObjectivesObserver(100))
-
     algorithm.run()
-
-    print("Algorithm (continuous problem): " + algorithm.get_name())
-    print("Problem: " + problem.name())
-    print("Computing time: " + str(algorithm.total_computing_time))
+    solutions = algorithm.get_result()
 
 def show_data():
 
