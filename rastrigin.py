@@ -6,6 +6,7 @@ LB = -5.12
 UB = 5.12
 funcName = "Rastrigin"
 
+
 def func(x, a=10):
     dim = len(x)
     return a * dim + np.sum([(xi ** 2 - a * np.cos(2 * np.pi * xi)) for xi in x])
@@ -20,9 +21,12 @@ if __name__ == "__main__":
     X = generate_points(-5.12, 5.12, amount_of_points)
     Y = generate_points(-5.12, 5.12, amount_of_points)
 
-    A = [[X[x] for _ in range(amount_of_points)] for x in range(amount_of_points)]
-    B = [[Y[y] for y in range(amount_of_points)] for _ in range(amount_of_points)]
-    C = [[func([X[x], Y[y]]) for y in range(amount_of_points)] for x in range(amount_of_points)]
+    A = [[X[x] for _ in range(amount_of_points)]
+         for x in range(amount_of_points)]
+    B = [[Y[y] for y in range(amount_of_points)]
+         for _ in range(amount_of_points)]
+    C = [[func([X[x], Y[y]]) for y in range(amount_of_points)]
+         for x in range(amount_of_points)]
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')

@@ -7,9 +7,15 @@ UB = 100
 funcName = "Schaffer"
 
 
-def func(x):
-    x, y = x[0], x[1]
-    return 0.5 + (np.square(np.sin(np.square(x)-np.square(y))) - 0.5)/np.square(1+0.001*(np.square(x)+np.square(y)))
+def schaffer(x):
+    if len(x) == 0:
+        x, y = 0, 0
+    elif len(x) == 1:
+        x, y = x[0], 0
+    else:
+        x, y = x[0], x[1]
+
+    return 0.5 + (np.square(np.sin(np.square(x) - np.square(y))) - 0.5) / np.square(1 + 0.001 * (np.square(x) + np.square(y)))
 
 
 def generate_points(min_val, max_val, num_points):
@@ -25,7 +31,7 @@ if __name__ == "__main__":
          for x in range(amount_of_points)]
     B = [[Y[y] for y in range(amount_of_points)]
          for _ in range(amount_of_points)]
-    C = [[func([X[x], Y[y]]) for y in range(amount_of_points)]
+    C = [[schaffer([X[x], Y[y]]) for y in range(amount_of_points)]
          for x in range(amount_of_points)]
 
     fig = plt.figure()

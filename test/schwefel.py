@@ -2,14 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
-LB = -100
-UB = 100
-funcName = "Schaffer"
+LB = -500
+UB = 500
+funcName = "Schwefel"
 
 
-def func(x):
-    x, y = x[0], x[1]
-    return 0.5 + (np.square(np.sin(np.square(x)-np.square(y))) - 0.5)/np.square(1+0.001*(np.square(x)+np.square(y)))
+def schwefel(x):
+    dim = len(x)
+    return 418.9829 * dim - np.sum([(x_i * np.sin(np.sqrt(np.abs(x_i)))) for x_i in x])
 
 
 def generate_points(min_val, max_val, num_points):
@@ -25,7 +25,7 @@ if __name__ == "__main__":
          for x in range(amount_of_points)]
     B = [[Y[y] for y in range(amount_of_points)]
          for _ in range(amount_of_points)]
-    C = [[func([X[x], Y[y]]) for y in range(amount_of_points)]
+    C = [[schwefel([X[x], Y[y]]) for y in range(amount_of_points)]
          for x in range(amount_of_points)]
 
     fig = plt.figure()
