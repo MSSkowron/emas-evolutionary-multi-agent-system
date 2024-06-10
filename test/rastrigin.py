@@ -2,14 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
-LB = -100
-UB = 100
-funcName = "Schaffer"
+LB = -5.12
+UB = 5.12
+funcName = "Rastrigin"
 
 
-def func(x):
-    x, y = x[0], x[1]
-    return 0.5 + (np.square(np.sin(np.square(x)-np.square(y))) - 0.5)/np.square(1+0.001*(np.square(x)+np.square(y)))
+def rastrigin(x, a=10):
+    dim = len(x)
+    return a * dim + np.sum([(xi ** 2 - a * np.cos(2 * np.pi * xi)) for xi in x])
 
 
 def generate_points(min_val, max_val, num_points):
@@ -18,14 +18,14 @@ def generate_points(min_val, max_val, num_points):
 
 if __name__ == "__main__":
     dimension, amount_of_points = 2, 100
-    X = generate_points(LB, UB, amount_of_points)
-    Y = generate_points(LB, UB, amount_of_points)
+    X = generate_points(-5.12, 5.12, amount_of_points)
+    Y = generate_points(-5.12, 5.12, amount_of_points)
 
     A = [[X[x] for _ in range(amount_of_points)]
          for x in range(amount_of_points)]
     B = [[Y[y] for y in range(amount_of_points)]
          for _ in range(amount_of_points)]
-    C = [[func([X[x], Y[y]]) for y in range(amount_of_points)]
+    C = [[rastrigin([X[x], Y[y]]) for y in range(amount_of_points)]
          for x in range(amount_of_points)]
 
     fig = plt.figure()

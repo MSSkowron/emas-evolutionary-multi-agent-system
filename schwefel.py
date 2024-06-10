@@ -6,9 +6,11 @@ LB = -500
 UB = 500
 funcName = "Schwefel"
 
+
 def func(x):
     dim = len(x)
     return 418.9829 * dim - np.sum([(x_i * np.sin(np.sqrt(np.abs(x_i)))) for x_i in x])
+
 
 def generate_points(min_val, max_val, num_points):
     return np.linspace(min_val, max_val, num_points)
@@ -19,9 +21,12 @@ if __name__ == "__main__":
     X = generate_points(LB, UB, amount_of_points)
     Y = generate_points(LB, UB, amount_of_points)
 
-    A = [[X[x] for _ in range(amount_of_points)] for x in range(amount_of_points)]
-    B = [[Y[y] for y in range(amount_of_points)] for _ in range(amount_of_points)]
-    C = [[func([X[x], Y[y]]) for y in range(amount_of_points)] for x in range(amount_of_points)]
+    A = [[X[x] for _ in range(amount_of_points)]
+         for x in range(amount_of_points)]
+    B = [[Y[y] for y in range(amount_of_points)]
+         for _ in range(amount_of_points)]
+    C = [[func([X[x], Y[y]]) for y in range(amount_of_points)]
+         for x in range(amount_of_points)]
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')

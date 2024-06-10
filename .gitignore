@@ -1,5 +1,9 @@
 .idea
+.vscode
 /__pycache__
+/test/__pycache__
+.venv
 results.txt
-dual_annealing.py
-dual_annealing2.py
+/results/*.txt
+/results/*.png
+/results/*.json
