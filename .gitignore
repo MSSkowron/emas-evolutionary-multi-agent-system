@@ -7,3 +7,5 @@ results.txt
 /results/*.txt
 /results/*.png
 /results/*.json
+/test/plots/*.png
+/test/results/*.json

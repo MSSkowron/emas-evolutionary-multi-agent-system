@@ -273,7 +273,7 @@ class EMAS:
         best_agent = min(self.agents, key=lambda agent: agent.fitness)
         if self.numberOfFitnessEvaluations % 100 == 0:
             self.data[0].append(self.numberOfFitnessEvaluations)
-            self.data[1].append([best_agent.fitness])
+            self.data[1].append(best_agent.fitness)
 
 
 def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberOfFitnessEvaluations):
