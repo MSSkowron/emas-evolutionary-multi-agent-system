@@ -56,7 +56,6 @@ DIMENSIONS = 100
 NUM_AGENTS = 20
 MAX_FITNESS_EVALS = 5000
 AMOUNT_OF_BOXPLOTS = 13 # from 1 to MAX_FITNESS_EVALS//100
-EVERY_NTH_BOX_FOR_ALL = 4 # depends on value MAX_FITNESS_EVALS
 RESULTS_DIR = 'results/'
 PLOTS_DIR = 'plots/'
 
@@ -140,7 +139,7 @@ def plot_results(labels, results, avg, alg_name, func_name, every_nth_box=math.c
     plt.savefig(file_path)
 
 
-def plot_comparison(results, every_nth_box=EVERY_NTH_BOX_FOR_ALL):
+def plot_comparison(results, every_nth_box=math.ceil((MAX_FITNESS_EVALS//100)/AMOUNT_OF_BOXPLOTS)):
     # 3D array of results:
     #         func1 func2 func3 func4
     # alg1: [  [lbs],   [],   [],   [] ] = row_of_functions
@@ -174,9 +173,8 @@ def plot_comparison(results, every_nth_box=EVERY_NTH_BOX_FOR_ALL):
             ax.plot(labels, row, label=alg["name"])
         
         avg_results = np.array(avg_results)
-        AMOUNT = len(row)
 
-        ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[AMOUNT*3 for _ in range(math.ceil((AMOUNT)/every_nth_box))])
+        ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[AX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
         ax.set_title("Comparison of algorithms for func: "+func_name)
         ax.set_xlabel("Number of fitness evaluations")
         ax.set_ylabel("Fitness")
@@ -187,7 +185,7 @@ def plot_comparison(results, every_nth_box=EVERY_NTH_BOX_FOR_ALL):
         fig, ax = plt.subplots()
 
         ax.plot(labels, np.average(avg_results, axis=0), label="Average of algorithms")
-        ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[AMOUNT*3 for _ in range(math.ceil((AMOUNT)/every_nth_box))])
+        ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[AX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
         ax.set_title("Comparison of algorithms for func: "+func_name)
         ax.set_xlabel("Number of fitness evaluations")
         ax.set_ylabel("Fitness")
