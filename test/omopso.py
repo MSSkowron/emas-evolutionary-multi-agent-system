@@ -45,7 +45,6 @@ class PrintObjectivesObserver(Observer):
             else:
                 fitness = solutions.objectives
 
-            # print("Evaluations: {}. fitness: {}".format(evaluations, fitness))
             self.data[0].append(evaluations)
             self.data[1].append(fitness)
 

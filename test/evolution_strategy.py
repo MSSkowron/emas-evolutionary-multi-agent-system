@@ -45,7 +45,6 @@ class PrintObjectivesObserver(Observer):
                 fitness = solutions[0].objectives
             else:
                 fitness = solutions.objectives
-            # print("Evaluations: {}. fitness: {}".format(evaluations, fitness))
             self.data[0].append(evaluations)
             self.data[1].append(fitness)
 
@@ -67,9 +66,6 @@ def solve(problem, numberOfAgents, maxNumberOfFitnessEvaluations):
 
     algorithm.run()
 
-    print("Algorithm (continuous problem): " + algorithm.get_name())
-    print("Problem: " + problem.name())
-    print("Computing time: " + str(algorithm.total_computing_time))
     return data
 
 
