@@ -142,7 +142,7 @@ def plot_results(run_id, labels, results, avg, alg_name, func_name, every_nth_bo
     ax.boxplot(list(box_data_y.T[::every_nth_box]), positions=list(box_data_x[::every_nth_box]), widths=[
                MAX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
 
-    ax.set_title(f"{alg_name} on {func_name}")
+    ax.set_title(f"{alg_name} for function {func_name}")
     ax.set_xlabel("Number of fitness evaluations")
     ax.set_ylabel("Fitness")
     # ax.legend()
@@ -217,6 +217,22 @@ def plot_comparison(run_id, results, every_nth_box=math.ceil((MAX_FITNESS_EVALS/
         file_path = os.path.join(
             PLOTS_DIR, f'{run_id}_plot_comparison_avg_{func_name}.png')
         plt.savefig(file_path)
+
+        for algorithm in results:
+            fig, ax = plt.subplots()
+            row = np.array(
+                [function["avg"] for function in algorithm["functions"] if function["name"] == func_name])
+
+            ax.plot(labels, row[0], label="Average of algor ithms")
+            ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[MAX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
+            ax.set_title("Comparison of algorithms for func: "+func_name+" for algo: "+algorithm["name"])
+            ax.set_xlabel("Number of fitness evaluations")
+            ax.set_ylabel("Fitness")
+            ax.legend(fontsize="6", loc ="upper right")
+            file_path = os.path.join(
+                PLOTS_DIR, f'{run_id}_plot_comparison_avg_{func_name}_alg_{algorithm["name"]}.png')
+            plt.savefig(file_path)
+
         plt.close(fig)
 
 
