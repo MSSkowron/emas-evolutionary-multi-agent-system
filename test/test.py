@@ -52,6 +52,7 @@ functions = [
 ]
 
 # Define constants
+<<<<<<< HEAD
 NUM_TESTS = 10
 DIMENSIONS = 100
 NUM_AGENTS = 20
@@ -59,6 +60,15 @@ MAX_FITNESS_EVALS = 5000
 AMOUNT_OF_BOXPLOTS = 13  # from 1 to MAX_FITNESS_EVALS//100
 PLOTS_DIR = 'plots'
 RESULTS_DIR = 'results'
+=======
+NUM_TESTS = 2
+DIMENSIONS = 10
+NUM_AGENTS = 20
+MAX_FITNESS_EVALS = 1000
+AMOUNT_OF_BOXPLOTS = 5 # from 1 to MAX_FITNESS_EVALS//100
+RESULTS_DIR = 'results/'
+PLOTS_DIR = 'plots/'
+>>>>>>> 259b94a (feat: little fix)
 
 # Initialize results and threads structures
 results = [
@@ -209,8 +219,18 @@ for algorithm in threads:
         for thread in function["threads"]:
             thread.join()
 
+<<<<<<< HEAD
 # Save results to files
 os.makedirs(RESULTS_DIR, exist_ok=True)
+=======
+        ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[MAX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
+        ax.set_title("Comparison of algorithms for func: "+func_name)
+        ax.set_xlabel("Number of fitness evaluations")
+        ax.set_ylabel("Fitness")
+        ax.legend(fontsize="6", loc ="upper right")
+        file_path = f'{PLOTS_DIR}plot_{str(time.time())}_Comparison_all_{func_name}.png'
+        plt.savefig(file_path)
+>>>>>>> 259b94a (feat: little fix)
 
 for algorithm in results:
     file_path = os.path.join(RESULTS_DIR, f'{run_id}_{algorithm["name"]}.json')
@@ -220,8 +240,28 @@ for algorithm in results:
     except Exception as e:
         print(f"Error while saving results to file '{file_path}': {e}")
 
+<<<<<<< HEAD
 # # Generate plots
 # os.makedirs(PLOTS_DIR, exist_ok=True)
+=======
+        ax.plot(labels, np.average(avg_results, axis=0), label="Average of algorithms")
+        ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[MAX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
+        ax.set_title("Comparison of algorithms for func: "+func_name)
+        ax.set_xlabel("Number of fitness evaluations")
+        ax.set_ylabel("Fitness")
+        ax.legend(fontsize="6", loc ="upper right")
+        file_path = f'{PLOTS_DIR}plot_{str(time.time())}_Comparison_avg_{func_name}.png'
+        plt.savefig(file_path)
+
+if __name__ == "__main__":
+    perform_calculations()
+
+    for alg in results:
+        for func in alg["functions"]:
+            plot_results(alg["labels"], func["results"], func["avg"], alg["name"], func["name"])
+
+    plot_comparison(results)
+>>>>>>> 259b94a (feat: little fix)
 
 # for algorithm in results:
 #     for function in algorithm["functions"]:
