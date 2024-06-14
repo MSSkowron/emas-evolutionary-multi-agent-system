@@ -93,7 +93,7 @@ threads = [
 # Function to run an algorithm
 def run_algorithm(algorithm, function, LB, UB, dimensions, num_agents, max_fitness_evals, results, alg_idx, function_idx, test_idx):
     print(
-        f"Running {algorithm.__name__} on {function.__name__} test {test_idx+1}/{NUM_TESTS}")
+        f"Starting {algorithm.__name__} on {function.__name__} test {test_idx+1}/{NUM_TESTS}")
     start_time = time.time()
     result = algorithm.run(dimensions, function, LB, UB,
                            num_agents, max_fitness_evals)
