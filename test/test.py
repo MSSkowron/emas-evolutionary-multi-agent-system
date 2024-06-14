@@ -52,10 +52,10 @@ functions = [
 ]
 
 # Define constants
-NUM_TESTS = 2
-DIMENSIONS = 10
+NUM_TESTS = 10
+DIMENSIONS = 100
 NUM_AGENTS = 20
-MAX_FITNESS_EVALS = 1000
+MAX_FITNESS_EVALS = 3000
 AMOUNT_OF_BOXPLOTS = 5  # from 1 to MAX_FITNESS_EVALS//100
 RESULTS_DIR = 'results'
 PLOTS_DIR = 'plots'
@@ -225,11 +225,13 @@ def plot_comparison(run_id, results, every_nth_box=math.ceil((MAX_FITNESS_EVALS/
                 [function["avg"] for function in algorithm["functions"] if function["name"] == func_name])
 
             ax.plot(labels, row[0], label="Average of algor ithms")
-            ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[MAX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
-            ax.set_title("Comparison of algorithms for func: "+func_name+" for algo: "+algorithm["name"])
+            ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[
+                       MAX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
+            ax.set_title("Comparison of algorithms for func: " +
+                         func_name+" for algo: "+algorithm["name"])
             ax.set_xlabel("Number of fitness evaluations")
             ax.set_ylabel("Fitness")
-            ax.legend(fontsize="6", loc ="upper right")
+            ax.legend(fontsize="6", loc="upper right")
             file_path = os.path.join(
                 PLOTS_DIR, f'{run_id}_plot_comparison_avg_{func_name}_alg_{algorithm["name"]}.png')
             plt.savefig(file_path)
