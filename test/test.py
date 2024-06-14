@@ -100,7 +100,7 @@ def run_algorithm(algorithm, function, LB, UB, dimensions, num_agents, max_fitne
     end_time = time.time()
     results[alg_idx]["labels"] = result[0]
     results[alg_idx]["functions"][function_idx]["results"][test_idx] = result[1]
-    print(f"Finished {algorithm.__name__} on {function.__name__} test {test_idx+1}/{NUM_TESTS} in {end_time-start_time} seconds")
+    print(f"Finished {algorithm.__name__} on {function.__name__} test {test_idx+1}/{NUM_TESTS} in {round(end_time-start_time, 2)} seconds")
 
 
 def perform_calculations(run_id):
