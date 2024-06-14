@@ -53,9 +53,9 @@ functions = [
 
 # Define constants
 NUM_TESTS = 10
-DIMENSIONS = 100
+DIMENSIONS = 10
 NUM_AGENTS = 20
-MAX_FITNESS_EVALS = 3000
+MAX_FITNESS_EVALS = 1000
 AMOUNT_OF_BOXPLOTS = 5  # from 1 to MAX_FITNESS_EVALS//100
 RESULTS_DIR = 'results'
 PLOTS_DIR = 'plots'
@@ -108,10 +108,11 @@ def perform_calculations(run_id):
                 )
                 threads[alg_idx]["functions"][func_idx]["threads"][test_idx].start()
 
-    # Join threads
-    for algorithm in threads:
-        for function in algorithm["functions"]:
+        print(algorithm.__name__)
+        for function in threads[alg_idx]["functions"]:
+            print(function["name"] + " started")
             for thread in function["threads"]:
+                print(thread)
                 thread.join()
 
     # Calculate average results

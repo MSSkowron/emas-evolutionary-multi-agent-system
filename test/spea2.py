@@ -90,4 +90,4 @@ def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberO
 
 
 if __name__ == "__main__":
-    print(run(100, rastrigin, rastrigin_LB, rastrigin_UB, 20, 1000))
+    print(run(100, schwefel, schwefel_LB, schwefel_UB, 20, 100000))
