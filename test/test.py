@@ -51,11 +51,11 @@ functions = [
 ]
 
 # Define constants
-NUM_TESTS = 15
-DIMENSIONS = 100
+NUM_TESTS = 2
+DIMENSIONS = 10
 NUM_AGENTS = 20
-MAX_FITNESS_EVALS = 5000
-AMOUNT_OF_BOXPLOTS = 13 # from 1 to MAX_FITNESS_EVALS//100
+MAX_FITNESS_EVALS = 1000
+AMOUNT_OF_BOXPLOTS = 5 # from 1 to MAX_FITNESS_EVALS//100
 RESULTS_DIR = 'results/'
 PLOTS_DIR = 'plots/'
 
@@ -174,7 +174,7 @@ def plot_comparison(results, every_nth_box=math.ceil((MAX_FITNESS_EVALS//100)/AM
         
         avg_results = np.array(avg_results)
 
-        ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[AX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
+        ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[MAX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
         ax.set_title("Comparison of algorithms for func: "+func_name)
         ax.set_xlabel("Number of fitness evaluations")
         ax.set_ylabel("Fitness")
@@ -185,7 +185,7 @@ def plot_comparison(results, every_nth_box=math.ceil((MAX_FITNESS_EVALS//100)/AM
         fig, ax = plt.subplots()
 
         ax.plot(labels, np.average(avg_results, axis=0), label="Average of algorithms")
-        ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[AX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
+        ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[MAX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
         ax.set_title("Comparison of algorithms for func: "+func_name)
         ax.set_xlabel("Number of fitness evaluations")
         ax.set_ylabel("Fitness")
