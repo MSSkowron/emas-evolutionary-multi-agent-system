@@ -193,6 +193,20 @@ def plot_comparison(results, every_nth_box=math.ceil((MAX_FITNESS_EVALS//100)/AM
         file_path = f'{PLOTS_DIR}plot_{str(time.time())}_Comparison_avg_{func_name}.png'
         plt.savefig(file_path)
 
+        for alg in results:
+            fig, ax = plt.subplots()
+            row = np.array(*list(map(lambda func: func["avg"], filter(lambda func: func["name"] == func_name, alg["functions"]))))
+
+            ax.plot(labels, row, label="Average of algorithms")
+            ax.boxplot(list(avg_results.T[::every_nth_box]), positions=list(labels[::every_nth_box]), widths=[MAX_FITNESS_EVALS*0.03 for _ in range(math.ceil((MAX_FITNESS_EVALS/100)/every_nth_box))])
+            ax.set_title("Comparison of algorithms for func: "+func_name+" for algo: "+alg["name"])
+            ax.set_xlabel("Number of fitness evaluations")
+            ax.set_ylabel("Fitness")
+            ax.legend(fontsize="6", loc ="upper right")
+            file_path = f'{PLOTS_DIR}plot_{str(time.time())}_Comparison_avg_{func_name}_alg_{alg["name"]}.png'
+            plt.savefig(file_path)
+
+
 if __name__ == "__main__":
     perform_calculations()
 
