@@ -217,6 +217,7 @@ def plot_comparison(run_id, results, every_nth_box=math.ceil((MAX_FITNESS_EVALS/
         file_path = os.path.join(
             PLOTS_DIR, f'{run_id}_plot_comparison_avg_{func_name}.png')
         plt.savefig(file_path)
+        plt.close(fig)
 
         for algorithm in results:
             fig, ax = plt.subplots()
@@ -232,8 +233,8 @@ def plot_comparison(run_id, results, every_nth_box=math.ceil((MAX_FITNESS_EVALS/
             file_path = os.path.join(
                 PLOTS_DIR, f'{run_id}_plot_comparison_avg_{func_name}_alg_{algorithm["name"]}.png')
             plt.savefig(file_path)
+            plt.close(fig)
 
-        plt.close(fig)
 
 
 if __name__ == "__main__":
