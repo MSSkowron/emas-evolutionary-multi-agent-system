@@ -32,6 +32,8 @@ from schaffer import schaffer
 from schaffer import LB as schaffer_LB
 from schaffer import UB as schaffer_UB
 
+from concurrent.futures import ThreadPoolExecutor
+
 import logging
 
 logging.disable()
@@ -90,32 +92,35 @@ threads = [
 
 # Function to run an algorithm
 def run_algorithm(algorithm, function, LB, UB, dimensions, num_agents, max_fitness_evals, results, alg_idx, function_idx, test_idx):
+    print(
+        f"Running {algorithm.__name__} on {function.__name__} test {test_idx+1}/{NUM_TESTS}")
     result = algorithm.run(dimensions, function, LB, UB,
                            num_agents, max_fitness_evals)
     results[alg_idx]["labels"] = result[0]
     results[alg_idx]["functions"][function_idx]["results"][test_idx] = result[1]
+    print(
+        f"Finished {algorithm.__name__} on {function.__name__} test {test_idx+1}/{NUM_TESTS}")
 
 
 def perform_calculations(run_id):
-    # Start threads
-    for alg_idx, algorithm in enumerate(algorithms):
-        for func_idx, function in enumerate(functions):
-            for test_idx in range(NUM_TESTS):
-                threads[alg_idx]["functions"][func_idx]["threads"][test_idx] = Thread(
-                    target=run_algorithm,
-                    args=(algorithm,
-                          function["func"], function["LB"], function["UB"],
-                          DIMENSIONS, NUM_AGENTS, MAX_FITNESS_EVALS,
-                          results,
-                          alg_idx, func_idx, test_idx)
-                )
-                threads[alg_idx]["functions"][func_idx]["threads"][test_idx].start()
-            for test_idx in range(NUM_TESTS):
-                print(
-                    f"Running {algorithm.__name__} on {function['func'].__name__} test {test_idx+1}/{NUM_TESTS}")
-                threads[alg_idx]["functions"][func_idx]["threads"][test_idx].join()
-                print(
-                    f"Finished {algorithm.__name__} on {function['func'].__name__} test {test_idx+1}/{NUM_TESTS}")
+    num_algorithms = len(algorithms)
+    num_functions = len(functions)
+    max_workers = num_algorithms * num_functions * NUM_TESTS
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_test = {}
+        for alg_idx, algorithm in enumerate(algorithms):
+            for func_idx, function in enumerate(functions):
+                for test_idx in range(NUM_TESTS):
+                    future = executor.submit(run_algorithm, algorithm,
+                                             function["func"], function["LB"], function["UB"],
+                                             DIMENSIONS, NUM_AGENTS, MAX_FITNESS_EVALS,
+                                             results,
+                                             alg_idx, func_idx, test_idx)
+                    future_to_test[future] = (alg_idx, func_idx, test_idx)
+
+        for future in future_to_test:
+            future.result()
 
     # Calculate average results
     for algorithm in results:
