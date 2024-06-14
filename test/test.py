@@ -236,7 +236,6 @@ def plot_comparison(run_id, results, every_nth_box=math.ceil((MAX_FITNESS_EVALS/
             plt.close(fig)
 
 
-
 if __name__ == "__main__":
     run_id = str(time.time())
 
