@@ -32,6 +32,9 @@ from schaffer import schaffer
 from schaffer import LB as schaffer_LB
 from schaffer import UB as schaffer_UB
 
+import logging
+
+logging.disable()
 
 algorithms = [
     emas,
@@ -107,13 +110,12 @@ def perform_calculations(run_id):
                           alg_idx, func_idx, test_idx)
                 )
                 threads[alg_idx]["functions"][func_idx]["threads"][test_idx].start()
-
-        print(algorithm.__name__)
-        for function in threads[alg_idx]["functions"]:
-            print(function["name"] + " started")
-            for thread in function["threads"]:
-                print(thread)
-                thread.join()
+            for test_idx in range(NUM_TESTS):
+                print(
+                    f"Running {algorithm.__name__} on {function['func'].__name__} test {test_idx+1}/{NUM_TESTS}")
+                threads[alg_idx]["functions"][func_idx]["threads"][test_idx].join()
+                print(
+                    f"Finished {algorithm.__name__} on {function['func'].__name__} test {test_idx+1}/{NUM_TESTS}")
 
     # Calculate average results
     for algorithm in results:
