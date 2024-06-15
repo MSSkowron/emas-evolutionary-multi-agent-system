@@ -5,7 +5,4 @@
 .venv
 results.txt
 /results
-/test/results
 /plots
-/test/plots
-/test/results

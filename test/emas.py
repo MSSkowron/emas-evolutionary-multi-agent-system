@@ -28,13 +28,20 @@ settings = {
     "mutation_probability": 1,
     "crossover_probability": 0.5,
     "distribution_index": 0.2,
-    "fightLossEnergy": 0.05,
+    "fightLossEnergy": 0.98,
     "reproduceLossEnergy": 0.3,
     "reproduceReqEnergy": 1700,
     "deathThreshold": 8,
-    "crowdingFactor": 1000
+    "crowdingFactor": 2000
 }
 
+functions = [
+    {"func": rastrigin, "LB": rastrigin_LB, "UB": rastrigin_UB},
+    {"func": sphere, "LB": sphere_LB, "UB": sphere_UB},
+    {"func": schwefel, "LB": schwefel_LB, "UB": schwefel_UB},
+    {"func": schaffer, "LB": schaffer_LB, "UB": schaffer_UB}
+]
+no_change = False
 
 class Agent:
     def __init__(self, x, emas, energy=settings["startEnergy"]):
@@ -170,7 +177,12 @@ class Agent:
 
     @staticmethod
     def fight(agent_1, agent_2, loss_energy):
+        # global no_change
         d = np.sum(np.abs(np.array(agent_1.x) - np.array(agent_2.x)))
+        # if no_change:
+        # print("d: ", d)
+            # print("agent1: ", agent_1.x, " agent2: ", agent_2.x)
+            # no_change = False
         if agent_1.fitness < agent_2.fitness:
             energy = agent_2.energy * loss_energy
             agent_1.energy += energy
@@ -277,6 +289,7 @@ class EMAS:
 
 
 def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberOfFitnessEvaluations):
+    # global no_change
     emas = EMAS(function, lowerBound, upperBound)
     agents = [Agent([random.uniform(lowerBound, upperBound) for _ in range(dimensions)], emas=emas)
               for _ in range(numberOfAgents)]
@@ -285,7 +298,18 @@ def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberO
 
     emas.update_data()
 
+    # prev_num_of_agents = 0
     while emas.numberOfFitnessEvaluations < maxNumberOfFitnessEvaluations:
+        # print(test_nr+" func: "+function.__name__+" ")
+        # for i in range(nr_test):
+            # print("    ", end="")
+        # print("num of fitness evaluations: ", emas.numberOfFitnessEvaluations, " num of agents: ", len(emas.agents))
+        # if len(emas.agents) == prev_num_of_agents:
+            # no_change = True
+            # if len(emas.agents) > 1:
+                # print("gen: ", emas.agents[0].x, " ", emas.agents[1].x)
+            # print("no change in number of agents")
+        # prev_num_of_agents = len(emas.agents)
         emas.run_iteration()
 
     best_agent = min(emas.agents, key=lambda agent: agent.fitness)
@@ -297,4 +321,10 @@ def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberO
 
 
 if __name__ == "__main__":
-    print(run(100, rastrigin, rastrigin_LB, rastrigin_UB, 20, 1000))
+    
+    # for function in functions:
+        # print("function name: ", function["func"].__name__)
+        # print(run(100, function["func"], function["LB"], function["UB"], 20, 5000))
+    # print(run(100, rastrigin, rastrigin_LB, rastrigin_UB, 20, 5000))
+    # print(run(100, schwefel, schwefel_LB, schwefel_UB, 20, 5000))
+    print(run(100, schaffer, schaffer_LB, schaffer_UB, 20, 5000))

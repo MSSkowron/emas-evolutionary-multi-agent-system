@@ -50,18 +50,18 @@ algorithms = [
 ]
 
 functions = [
-    {"func": rastrigin, "LB": rastrigin_LB, "UB": rastrigin_UB},
-    {"func": sphere, "LB": sphere_LB, "UB": sphere_UB},
-    {"func": schwefel, "LB": schwefel_LB, "UB": schwefel_UB},
-    {"func": schaffer, "LB": schaffer_LB, "UB": schaffer_UB}
+    {"func": rastrigin, "LB": rastrigin_LB, "UB": rastrigin_UB, "dim": 100},
+    {"func": sphere, "LB": sphere_LB, "UB": sphere_UB, "dim": 100},
+    {"func": schwefel, "LB": schwefel_LB, "UB": schwefel_UB, "dim": 100},
+    {"func": schaffer, "LB": schaffer_LB, "UB": schaffer_UB, "dim": 100}
 ]
 
 # Define constants
-NUM_TESTS = 10
-DIMENSIONS = 100
+NUM_TESTS = 15
+# DIMENSIONS = 100
 NUM_AGENTS = 20
 MAX_FITNESS_EVALS = 5000
-AMOUNT_OF_BOXPLOTS = 5  # from 1 to MAX_FITNESS_EVALS//100
+AMOUNT_OF_BOXPLOTS = 13  # from 1 to MAX_FITNESS_EVALS//100
 RESULTS_DIR = 'results'
 PLOTS_DIR = 'plots'
 
@@ -115,7 +115,7 @@ def perform_calculations(run_id):
                 for test_idx in range(NUM_TESTS):
                     future = executor.submit(run_algorithm, algorithm,
                                              function["func"], function["LB"], function["UB"],
-                                             DIMENSIONS, NUM_AGENTS, MAX_FITNESS_EVALS,
+                                             function["dim"], NUM_AGENTS, MAX_FITNESS_EVALS,
                                              results,
                                              alg_idx, func_idx, test_idx)
                     future_to_test[future] = (alg_idx, func_idx, test_idx)
