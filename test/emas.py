@@ -210,6 +210,8 @@ class EMAS:
         self.emasIsRunning = False
         self.data = [[], []]
 
+        self.best_fitness = float('inf')
+
     def setAgents(self, agents):
         self.agents = agents
 
@@ -229,6 +231,7 @@ class EMAS:
 
         # remove dead
         dead = self.clear()
+
 
     def reproduce(self):
         req_energy = settings["reproduceReqEnergy"]
@@ -271,6 +274,7 @@ class EMAS:
             return
 
         best_agent = min(self.agents, key=lambda agent: agent.fitness)
+        self.best_fitness = best_agent.fitness
         if self.numberOfFitnessEvaluations % 100 == 0:
             self.data[0].append(self.numberOfFitnessEvaluations)
             self.data[1].append(best_agent.fitness)
@@ -285,8 +289,18 @@ def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberO
 
     emas.update_data()
 
+    last_best_fitness = 0
+    best_fitness_change_it = 0
     while emas.numberOfFitnessEvaluations < maxNumberOfFitnessEvaluations:
         emas.run_iteration()
+        if emas.best_fitness == last_best_fitness:
+            if best_fitness_change_it > 300:
+                print("Nothing changed in 300 iterations")
+                break
+            best_fitness_change_it += 1
+        else:
+            last_best_fitness = emas.best_fitness
+            best_fitness_change_it = 0
 
     best_agent = min(emas.agents, key=lambda agent: agent.fitness)
 
@@ -297,4 +311,4 @@ def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberO
 
 
 if __name__ == "__main__":
-    print(run(100, rastrigin, rastrigin_LB, rastrigin_UB, 20, 1000))
+    print(run(100, schaffer, schaffer_LB, schaffer_UB, 20, 5000))
