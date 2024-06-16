@@ -232,7 +232,6 @@ class EMAS:
         # remove dead
         dead = self.clear()
 
-
     def reproduce(self):
         req_energy = settings["reproduceReqEnergy"]
         loss_energy = settings["reproduceLossEnergy"]
@@ -294,8 +293,8 @@ def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberO
     while emas.numberOfFitnessEvaluations < maxNumberOfFitnessEvaluations:
         emas.run_iteration()
         if emas.best_fitness == last_best_fitness:
-            if best_fitness_change_it > 300:
-                print("Nothing changed in 300 iterations")
+            if best_fitness_change_it > 100:
+                print("Nothing changed in 100 iterations")
                 break
             best_fitness_change_it += 1
         else:
