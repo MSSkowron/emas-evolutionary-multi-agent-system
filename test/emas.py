@@ -301,6 +301,11 @@ def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberO
             last_best_fitness = emas.best_fitness
             best_fitness_change_it = 0
 
+    # Ensure the data array is filled to the expected length
+    while len(emas.data[0]) < maxNumberOfFitnessEvaluations // 100:
+        emas.data[0].append(emas.data[0][-1])
+        emas.data[1].append(emas.data[1][-1])
+
     best_agent = min(emas.agents, key=lambda agent: agent.fitness)
 
     for i in range(len(best_agent.x)):
