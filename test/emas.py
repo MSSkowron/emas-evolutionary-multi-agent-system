@@ -293,8 +293,8 @@ def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberO
     while emas.numberOfFitnessEvaluations < maxNumberOfFitnessEvaluations:
         emas.run_iteration()
         if emas.best_fitness == last_best_fitness:
-            if best_fitness_change_it > 100:
-                print("Nothing changed in 100 iterations")
+            if best_fitness_change_it > 300:
+                print("Nothing changed in 300 iterations")
                 break
             best_fitness_change_it += 1
         else:
@@ -303,7 +303,7 @@ def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberO
 
     # Ensure the data array is filled to the expected length
     while len(emas.data[0]) < maxNumberOfFitnessEvaluations // 100:
-        emas.data[0].append(emas.data[0][-1])
+        emas.data[0].append(emas.data[0][-1] + 100)
         emas.data[1].append(emas.data[1][-1])
 
     best_agent = min(emas.agents, key=lambda agent: agent.fitness)
@@ -315,4 +315,4 @@ def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberO
 
 
 if __name__ == "__main__":
-    print(run(100, schaffer, schaffer_LB, schaffer_UB, 20, 5000))
+    run(100, schaffer, schaffer_LB, schaffer_UB, 20, 5000)
