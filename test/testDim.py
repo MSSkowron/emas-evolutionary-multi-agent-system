@@ -50,16 +50,17 @@ algorithms = [
 ]
 
 functions = [
-    {"func": rastrigin, "LB": rastrigin_LB, "UB": rastrigin_UB, "dimensions":100},
-    {"func": sphere, "LB": sphere_LB, "UB": sphere_UB, "dimensions":100},
-    {"func": schwefel, "LB": schwefel_LB, "UB": schwefel_UB, "dimensions":100},
-    {"func": rosenbrock, "LB": rosenbrock_LB, "UB": rosenbrock_UB, "dimensions":100}
+    {"func": rastrigin, "LB": rastrigin_LB, "UB": rastrigin_UB},
+    {"func": sphere, "LB": sphere_LB, "UB": sphere_UB},
+    {"func": schwefel, "LB": schwefel_LB, "UB": schwefel_UB},
+    {"func": rosenbrock, "LB": rosenbrock_LB, "UB": rosenbrock_UB}
 ]
 
 # Define constants
+DIMENSIONS = [2,10,20,50,100,300]
 NUM_TESTS = 10
 NUM_AGENTS = 20
-MAX_FITNESS_EVALS = 5000
+MAX_FITNESS_EVALS = 300
 AMOUNT_OF_BOXPLOTS = 5  # from 1 to MAX_FITNESS_EVALS//100
 RESULTS_DIR = 'results'
 PLOTS_DIR = 'plots'
@@ -69,8 +70,14 @@ results = [
     {
         "name": alg.__name__,
         "functions": [
-            {"name": function["func"].__name__,
-                "results": [None] * NUM_TESTS, "avg": []}
+            {
+                "name": function["func"].__name__,
+                "dimensions":[{
+                    "dimension":dim,
+                    "results": [None] * NUM_TESTS, 
+                    "avg": []
+                    } for dim in DIMENSIONS]
+                }
             for function in functions
         ],
         "labels": []
@@ -81,43 +88,67 @@ threads = [
     {
         "name": alg.__name__,
         "functions": [
-            {"name": function["func"].__name__, "threads": [None] * NUM_TESTS}
+            {
+                "name": function["func"].__name__,
+                 "dimensions": [{
+                    "dimension":dim,
+                    "threads": [None] * NUM_TESTS
+                    } for dim in DIMENSIONS]
+                  }
             for function in functions
         ]
+    }
+    for alg in algorithms
+]
+best_fitness = [
+    {
+        "name": alg.__name__,
+        "functions": [
+            {
+                "name": function["func"].__name__,
+                "dimensions":[{
+                    "dimension":dim,
+                    "best_fitness":float('inf')
+                    } for dim in DIMENSIONS]
+                }
+            for function in functions
+        ],
+        "labels": []
     }
     for alg in algorithms
 ]
 
 
 # Function to run an algorithm
-def run_algorithm(algorithm, function, LB, UB, dimensions, num_agents, max_fitness_evals, results, alg_idx, function_idx, test_idx):
+def run_algorithm(algorithm, function, LB, UB, dimensions, num_agents, max_fitness_evals, results, alg_idx, function_idx, dim_idx, test_idx):
     print(
-        f"Starting {algorithm.__name__} on {function.__name__} test {test_idx+1}/{NUM_TESTS}")
+        f"Starting {algorithm.__name__} on {function.__name__} {dimensions} dimensions test {test_idx+1}/{NUM_TESTS}")
     start_time = time.time()
     result = algorithm.run(dimensions, function, LB, UB,
                            num_agents, max_fitness_evals)
     end_time = time.time()
     results[alg_idx]["labels"] = result[0]
-    results[alg_idx]["functions"][function_idx]["results"][test_idx] = result[1]
-    print(f"Finished {algorithm.__name__} on {function.__name__} test {test_idx+1}/{NUM_TESTS} in {round(end_time-start_time, 2)} seconds")
+    results[alg_idx]["functions"][function_idx]["dimensions"][dim_idx]["results"][test_idx] = result[1]
+    print(f"Finished {algorithm.__name__} on {function.__name__} {dimensions} dimensions test {test_idx+1}/{NUM_TESTS} in {round(end_time-start_time, 2)} seconds")
 
 
 def perform_calculations(run_id):
     num_algorithms = len(algorithms)
     num_functions = len(functions)
-    max_workers = num_algorithms * num_functions * NUM_TESTS
+    max_workers = num_algorithms * num_functions * len(DIMENSIONS) * NUM_TESTS
 
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+    with ThreadPoolExecutor() as executor:
         future_to_test = {}
         for alg_idx, algorithm in enumerate(algorithms):
             for func_idx, function in enumerate(functions):
-                for test_idx in range(NUM_TESTS):
-                    future = executor.submit(run_algorithm, algorithm,
-                                             function["func"], function["LB"], function["UB"],
-                                             function["dimensions"], NUM_AGENTS, MAX_FITNESS_EVALS,
-                                             results,
-                                             alg_idx, func_idx, test_idx)
-                    future_to_test[future] = (alg_idx, func_idx, test_idx)
+                for dim_idx, dimension in enumerate(DIMENSIONS):
+                    for test_idx in range(NUM_TESTS):
+                        future = executor.submit(run_algorithm, algorithm,
+                                                function["func"], function["LB"], function["UB"],
+                                                dimension, NUM_AGENTS, MAX_FITNESS_EVALS,
+                                                results,
+                                                alg_idx, func_idx, dim_idx, test_idx)
+                        future_to_test[future] = (alg_idx, func_idx, dim_idx, test_idx)
 
         for future in future_to_test:
             future.result()
@@ -125,8 +156,9 @@ def perform_calculations(run_id):
     # Calculate average results
     for algorithm in results:
         for function in algorithm["functions"]:
-            function["avg"] = list(np.average(
-                np.array(function["results"]), axis=0))
+            for dimension in function["dimensions"]:
+                dimension["avg"] = list(np.average(
+                    np.array(dimension["results"]), axis=0))
 
     # Save results to files
     for algorithm in results:
@@ -254,9 +286,23 @@ if __name__ == "__main__":
 
     perform_calculations(run_id)
 
-    for algorithmn in results:
-        for function in algorithmn["functions"]:
-            plot_results(run_id, algorithmn["labels"], function["results"],
-                         function["avg"], algorithmn["name"], function["name"])
+    for alg_idx, algorithm in enumerate(algorithms):
+        for func_idx, function in enumerate(functions):
+            for dim_idx, dimension in enumerate(DIMENSIONS):
+                best_fitness = min(dimension["results"],lambda x: x[-1])
+                best_fitness[alg_idx]["functions"][func_idx]["dimensions"][dim_idx]["best_fitness"] = best_fitness
+    
+    file_path = os.path.join(
+        RESULTS_DIR, f'{run_id}_best_fitness_per_dimension.json')
+    try:
+        with open(file_path, 'w') as file:
+            json.dump(best_fitness, file, indent=4)
+    except Exception as e:
+        print(f"Error while saving results to file {file_path}: {e}")
+    # for algorithmn in results:
+    #     for function in algorithmn["functions"]:
+    #         for dimension in DIMENSIONS:
+    #             plot_results(run_id,dimension, algorithmn["labels"], function["results"],
+    #                      function["avg"], algorithmn["name"], function["name"])
 
-    plot_comparison(run_id, results)
+    # plot_comparison(run_id, results)

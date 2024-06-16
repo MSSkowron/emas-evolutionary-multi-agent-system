@@ -7,14 +7,14 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-from rastrigin import func
-from rastrigin import LB, UB, funcName
+# from rastrigin import func
+# from rastrigin import LB, UB, funcName
 
 # from sphere import func
 # from sphere import LB, UB, funcName
 
-# from schaffer import func
-# from schaffer import LB, UB, funcName
+from rosenbrock import func
+from rosenbrock import LB, UB, funcName
 
 # from schwefel import func
 # from schwefel import LB, UB, funcName
@@ -33,7 +33,7 @@ settings = {
 
 dimensions = 100
 numberOfAgents = 20
-maxNumberOfFitnessEvaluations = 1000
+maxNumberOfFitnessEvaluations = 15000
 
 numberOfFitnessEvaluations = 0
 numberOfBornAgents, numberOfDeadAgents = 0, 0
