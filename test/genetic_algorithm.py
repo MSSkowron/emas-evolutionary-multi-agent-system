@@ -1,6 +1,6 @@
 from jmetal.algorithm.singleobjective.genetic_algorithm import GeneticAlgorithm
 from jmetal.operator import PolynomialMutation, SBXCrossover
-from problem import Rastrigin, Sphere, Schwefel, Schaffer
+from problem import Rastrigin, Sphere, Schwefel, Rosenbrock
 from jmetal.util.comparator import DominanceComparator
 from jmetal.util.solution import print_function_values_to_file, print_variables_to_file, get_non_dominated_solutions, print_function_values_to_file
 from jmetal.util.termination_criterion import StoppingByEvaluations
@@ -21,9 +21,10 @@ from schwefel import schwefel
 from schwefel import LB as schwefel_LB
 from schwefel import UB as schwefel_UB
 
-from schaffer import schaffer
-from schaffer import LB as schaffer_LB
-from schaffer import UB as schaffer_UB
+from rosenbrock import rosenbrock
+from rosenbrock import LB as rosenbrock_LB
+from rosenbrock import UB as rosenbrock_UB
+
 
 
 class PrintObjectivesObserver(Observer):
@@ -75,8 +76,8 @@ def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberO
         problem = Sphere(lowerBound, upperBound, dimensions)
     elif function.__name__ == "schwefel":
         problem = Schwefel(lowerBound, upperBound, dimensions)
-    elif function.__name__ == "schaffer":
-        problem = Schaffer(lowerBound, upperBound, dimensions)
+    elif function.__name__ == "rosenbrock":
+        problem = Rosenbrock(lowerBound, upperBound, dimensions)
     else:
         raise ValueError("Function not supported")
 

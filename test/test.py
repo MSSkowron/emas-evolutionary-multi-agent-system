@@ -59,7 +59,7 @@ functions = [
 # Define constants
 NUM_TESTS = 10
 NUM_AGENTS = 20
-MAX_FITNESS_EVALS = 5000
+MAX_FITNESS_EVALS = 1000
 AMOUNT_OF_BOXPLOTS = 5  # from 1 to MAX_FITNESS_EVALS//100
 RESULTS_DIR = 'results'
 PLOTS_DIR = 'plots'
@@ -107,7 +107,7 @@ def perform_calculations(run_id):
     num_functions = len(functions)
     max_workers = num_algorithms * num_functions * NUM_TESTS
 
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+    with ThreadPoolExecutor() as executor:
         future_to_test = {}
         for alg_idx, algorithm in enumerate(algorithms):
             for func_idx, function in enumerate(functions):

@@ -101,9 +101,9 @@ class Schwefel(FloatProblem):
         return "Schwefel"
 
 
-class Schaffer(FloatProblem):
+class Rosenbrock(FloatProblem):
     def __init__(self, lowerBound, upperBound, dimensions):
-        super(Schaffer, self).__init__()
+        super(Rosenbrock, self).__init__()
 
         self.obj_directions = [self.MINIMIZE]
         self.obj_labels = ["f(x)"]
@@ -124,17 +124,13 @@ class Schaffer(FloatProblem):
         return len(self.lower_bound)
 
     def evaluate(self, solution: FloatSolution) -> FloatSolution:
-        if len(solution.variables) == 0:
-            x, y = 0, 0
-        elif len(solution.variables) == 1:
-            x, y = solution.variables[0], 0
-        else:
-            x, y = solution.variables[0], solution.variables[1]
+        a = 10.0
 
-        solution.objectives[0] = 0.5 + (np.square(np.sin(np.square(x)-np.square(
-            y))) - 0.5)/np.square(1+0.001*(np.square(x)+np.square(y)))
+        solution.objectives[0] = np.sum([100*np.square(solution.variables[i+1]-np.square(solution.variables[i])) + np.square(solution.variables[i]-1) for i in range(len(solution.variables)-1)])
+
 
         return solution
 
     def name(self) -> str:
-        return "Schaffer"
+        return "Rosenbrock"
+

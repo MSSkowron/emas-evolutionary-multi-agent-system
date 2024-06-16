@@ -51,8 +51,8 @@ algorithms = [
 
 functions = [
     {"func": rastrigin, "LB": rastrigin_LB, "UB": rastrigin_UB},
-    {"func": sphere, "LB": sphere_LB, "UB": sphere_UB},
-    {"func": schwefel, "LB": schwefel_LB, "UB": schwefel_UB},
+    # {"func": sphere, "LB": sphere_LB, "UB": sphere_UB},
+    # {"func": schwefel, "LB": schwefel_LB, "UB": schwefel_UB},
     {"func": rosenbrock, "LB": rosenbrock_LB, "UB": rosenbrock_UB}
 ]
 
@@ -60,7 +60,7 @@ functions = [
 DIMENSIONS = [2,10,20,50,100,300]
 NUM_TESTS = 10
 NUM_AGENTS = 20
-MAX_FITNESS_EVALS = 300
+MAX_FITNESS_EVALS = 1000
 AMOUNT_OF_BOXPLOTS = 5  # from 1 to MAX_FITNESS_EVALS//100
 RESULTS_DIR = 'results'
 PLOTS_DIR = 'plots'
@@ -100,7 +100,7 @@ threads = [
     }
     for alg in algorithms
 ]
-best_fitness = [
+best_avg_fitness = [
     {
         "name": alg.__name__,
         "functions": [
@@ -108,7 +108,7 @@ best_fitness = [
                 "name": function["func"].__name__,
                 "dimensions":[{
                     "dimension":dim,
-                    "best_fitness":float('inf')
+                    "best_avg_fitness":float('inf')
                     } for dim in DIMENSIONS]
                 }
             for function in functions
@@ -286,17 +286,17 @@ if __name__ == "__main__":
 
     perform_calculations(run_id)
 
-    for alg_idx, algorithm in enumerate(algorithms):
-        for func_idx, function in enumerate(functions):
-            for dim_idx, dimension in enumerate(DIMENSIONS):
-                best_fitness = min(dimension["results"],lambda x: x[-1])
-                best_fitness[alg_idx]["functions"][func_idx]["dimensions"][dim_idx]["best_fitness"] = best_fitness
+    for alg_idx, algorithm in enumerate(results):
+        for func_idx, function in enumerate(algorithm["functions"]):
+            for dim_idx, dimension in enumerate(function["dimensions"]):
+                best_avg_fitness_in_dim = np.average([result[-1] for result in dimension["results"]])
+                best_avg_fitness[alg_idx]["functions"][func_idx]["dimensions"][dim_idx]["best_avg_fitness"] = best_avg_fitness_in_dim
     
     file_path = os.path.join(
         RESULTS_DIR, f'{run_id}_best_fitness_per_dimension.json')
     try:
         with open(file_path, 'w') as file:
-            json.dump(best_fitness, file, indent=4)
+            json.dump(best_avg_fitness, file, indent=4)
     except Exception as e:
         print(f"Error while saving results to file {file_path}: {e}")
     # for algorithmn in results:

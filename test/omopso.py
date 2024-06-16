@@ -4,7 +4,7 @@ from jmetal.operator.mutation import NonUniformMutation
 from jmetal.problem import ZDT1
 from jmetal.util.archive import CrowdingDistanceArchive
 from jmetal.util.termination_criterion import StoppingByEvaluations
-from problem import Rastrigin, Sphere, Schwefel, Schaffer
+from problem import Rastrigin, Sphere, Schwefel, Rosenbrock
 from jmetal.util.observer import Observer, VisualizerObserver
 import matplotlib.pyplot as plt
 import time
@@ -21,9 +21,9 @@ from schwefel import schwefel
 from schwefel import LB as schwefel_LB
 from schwefel import UB as schwefel_UB
 
-from schaffer import schaffer
-from schaffer import LB as schaffer_LB
-from schaffer import UB as schaffer_UB
+from rosenbrock import rosenbrock
+from rosenbrock import LB as rosenbrock_LB
+from rosenbrock import UB as rosenbrock_UB
 
 
 class PrintObjectivesObserver(Observer):
@@ -79,8 +79,8 @@ def run(dimensions, function, lowerBound, upperBound, swarm_size, maxNumberOfFit
         problem = Sphere(lowerBound, upperBound, dimensions)
     elif function.__name__ == "schwefel":
         problem = Schwefel(lowerBound, upperBound, dimensions)
-    elif function.__name__ == "schaffer":
-        problem = Schaffer(lowerBound, upperBound, dimensions)
+    elif function.__name__ == "rosenbrock":
+        problem = Rosenbrock(lowerBound, upperBound, dimensions)
     else:
         raise ValueError("Function not supported")
 
