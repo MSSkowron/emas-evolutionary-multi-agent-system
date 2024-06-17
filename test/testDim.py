@@ -133,15 +133,24 @@ def run_algorithm(algorithm, function, LB, UB, dimensions, num_agents, max_fitne
 
 
 def perform_calculations(run_id):
-    for alg_idx, algorithm in enumerate(algorithms):
-        for func_idx, function in enumerate(functions):
-            for dim_idx, dimension in enumerate(DIMENSIONS):
-                for test_idx in range(NUM_TESTS):
-                    run_algorithm(algorithm,
-                                  function["func"], function["LB"], function["UB"],
-                                  dimension, NUM_AGENTS, MAX_FITNESS_EVALS,
-                                  results,
-                                  alg_idx, func_idx, dim_idx, test_idx)
+    max_workers = 32
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_test = {}
+        for alg_idx, algorithm in enumerate(algorithms):
+            for func_idx, function in enumerate(functions):
+                for dim_idx, dimension in enumerate(DIMENSIONS):
+                    for test_idx in range(NUM_TESTS):
+                        future = executor.submit(run_algorithm, algorithm,
+                                                 function["func"], function["LB"], function["UB"],
+                                                 dimension, NUM_AGENTS, MAX_FITNESS_EVALS,
+                                                 results,
+                                                 alg_idx, func_idx, dim_idx, test_idx)
+                        future_to_test[future] = (
+                            alg_idx, func_idx, dim_idx, test_idx)
+
+        for future in future_to_test:
+            future.result()
 
     # Calculate average results
     for algorithm in results:
