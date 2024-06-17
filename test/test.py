@@ -50,19 +50,23 @@ algorithms = [
 ]
 
 functions = [
-    {"func": rastrigin, "LB": rastrigin_LB, "UB": rastrigin_UB, "dimensions":100},
-    {"func": sphere, "LB": sphere_LB, "UB": sphere_UB, "dimensions":100},
-    {"func": schwefel, "LB": schwefel_LB, "UB": schwefel_UB, "dimensions":100},
-    {"func": rosenbrock, "LB": rosenbrock_LB, "UB": rosenbrock_UB, "dimensions":100}
+    {"func": rastrigin, "LB": rastrigin_LB, "UB": rastrigin_UB,
+     "dimensions": 100},
+    {"func": sphere, "LB": sphere_LB, "UB": sphere_UB,
+     "dimensions": 100},
+    {"func": schwefel, "LB": schwefel_LB, "UB": schwefel_UB,
+     "dimensions": 100},
+    {"func": rosenbrock, "LB": rosenbrock_LB, "UB": rosenbrock_UB,
+     "dimensions": 100}
 ]
 
 # Define constants
 NUM_TESTS = 10
 NUM_AGENTS = 20
-MAX_FITNESS_EVALS = 1000
+MAX_FITNESS_EVALS = 5000
 AMOUNT_OF_BOXPLOTS = 5  # from 1 to MAX_FITNESS_EVALS//100
-RESULTS_DIR = 'results'
-PLOTS_DIR = 'plots'
+RESULTS_DIR = 'test_results'
+PLOTS_DIR = 'test_plots'
 
 # Initialize results and threads structures
 results = [
@@ -103,24 +107,14 @@ def run_algorithm(algorithm, function, LB, UB, dimensions, num_agents, max_fitne
 
 
 def perform_calculations(run_id):
-    num_algorithms = len(algorithms)
-    num_functions = len(functions)
-    max_workers = num_algorithms * num_functions * NUM_TESTS
-
-    with ThreadPoolExecutor() as executor:
-        future_to_test = {}
-        for alg_idx, algorithm in enumerate(algorithms):
-            for func_idx, function in enumerate(functions):
-                for test_idx in range(NUM_TESTS):
-                    future = executor.submit(run_algorithm, algorithm,
-                                             function["func"], function["LB"], function["UB"],
-                                             function["dimensions"], NUM_AGENTS, MAX_FITNESS_EVALS,
-                                             results,
-                                             alg_idx, func_idx, test_idx)
-                    future_to_test[future] = (alg_idx, func_idx, test_idx)
-
-        for future in future_to_test:
-            future.result()
+    for alg_idx, algorithm in enumerate(algorithms):
+        for func_idx, function in enumerate(functions):
+            for test_idx in range(NUM_TESTS):
+                run_algorithm(algorithm,
+                              function["func"], function["LB"], function["UB"],
+                              function["dimensions"], NUM_AGENTS, MAX_FITNESS_EVALS,
+                              results,
+                              alg_idx, func_idx, test_idx)
 
     # Calculate average results
     for algorithm in results:
