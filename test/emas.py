@@ -232,7 +232,6 @@ class EMAS:
         # remove dead
         dead = self.clear()
 
-
     def reproduce(self):
         req_energy = settings["reproduceReqEnergy"]
         loss_energy = settings["reproduceLossEnergy"]
@@ -301,6 +300,11 @@ def run(dimensions, function, lowerBound, upperBound, numberOfAgents, maxNumberO
         else:
             last_best_fitness = emas.best_fitness
             best_fitness_change_it = 0
+
+    # Ensure the data array is filled to the expected length
+    while len(emas.data[0]) < maxNumberOfFitnessEvaluations // 100:
+        emas.data[0].append(emas.data[0][-1] + 100)
+        emas.data[1].append(emas.data[1][-1])
 
     best_agent = min(emas.agents, key=lambda agent: agent.fitness)
 
